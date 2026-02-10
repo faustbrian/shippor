@@ -216,6 +216,16 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
                     value={draft.commerceInvoiceMeta.exportReason}
                     onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, exportReason: value } })}
                   />
+                  <Label>Incoterm</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.incoterm}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, incoterm: value } })}
+                  />
+                  <Label>Importer reference</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.importerReference}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, importerReference: value } })}
+                  />
                 </View>
               ) : null}
             </View>
@@ -263,6 +273,33 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Additional services</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text>Shipment collection service</Text>
+            <Switch
+              value={Boolean(draft.addons.pickup)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, pickup: value } })
+              }
+            />
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text>Doorstep delivery</Text>
+            <Switch
+              value={Boolean(draft.addons.delivery)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, delivery: value } })
+              }
+            />
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text>Delivered by 9 AM</Text>
+            <Switch
+              value={Boolean(draft.addons.delivery09)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, delivery09: value } })
+              }
+            />
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text>Fragile</Text>
             <Switch
               value={Boolean(draft.addons.fragile)}
@@ -271,6 +308,17 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
               }
             />
           </View>
+          {!isPrivateSender && !isSweden ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Limited quantities</Text>
+              <Switch
+                value={Boolean(draft.addons.limitedQtys)}
+                onValueChange={(value) =>
+                  setDraft({ ...draft, addons: { ...draft.addons, limitedQtys: value } })
+                }
+              />
+            </View>
+          ) : null}
           {!isPrivateSender && !isSweden ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <Text>Dangerous goods</Text>
@@ -282,6 +330,24 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
               />
             </View>
           ) : null}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text>Proof of delivery</Text>
+            <Switch
+              value={Boolean(draft.addons.proofOfDelivery)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, proofOfDelivery: value } })
+              }
+            />
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text>Call before delivery</Text>
+            <Switch
+              value={Boolean(draft.addons.callBeforeDelivery)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, callBeforeDelivery: value } })
+              }
+            />
+          </View>
         </SectionCard>
         {draft.addons.dangerous ? (
           <SectionCard>

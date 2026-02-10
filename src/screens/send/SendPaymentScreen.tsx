@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, Heading, PrimaryButton, SectionCard } from '../../components/ui';
@@ -10,6 +11,7 @@ import { PaymentStateBanner } from '../../components/PaymentStateBanner';
 import { CartSidePanelMobile } from '../../components/CartSidePanelMobile';
 import { PaymentSelectionFieldset } from '../../components/PaymentSelectionFieldset';
 import { AgreeToTermsFieldset } from '../../components/AgreeToTermsFieldset';
+import { validateStepAddressDetails, validateStepBasic, validateStepShipmentDetails } from '../../domain/shipmentValidation';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendPayment'>;
 
@@ -33,6 +35,36 @@ export function SendPaymentScreen({ navigation }: Props) {
   const isBusy = useAppStore((state) => state.isBusy);
   const totals = useCartTotals();
   const failedItemsCount = cart.filter((item) => item.state === 'failed-shipment-can-retry').length;
+
+  useEffect(() => {
+    const currentDraft = cart[0]?.draft;
+    if (!currentDraft) {
+      navigation.replace('SendCart');
+      return;
+    }
+
+    const basic = validateStepBasic(currentDraft);
+    const hasBasicErrors =
+      Object.keys(basic.senderAddress).length > 0 ||
+      Object.keys(basic.recipientAddress).length > 0 ||
+      Object.keys(basic.parcels).length > 0;
+    if (hasBasicErrors) {
+      navigation.replace('SendBasic');
+      return;
+    }
+
+    const address = validateStepAddressDetails(currentDraft);
+    if (address.senderAddress || address.recipientAddress) {
+      navigation.replace('SendAddressDetails');
+      return;
+    }
+
+    const details = validateStepShipmentDetails(currentDraft);
+    if (Object.keys(details).length > 0) {
+      navigation.replace('SendShipmentDetails');
+      return;
+    }
+  }, [cart, navigation]);
 
   const submit = async () => {
     if (failedItemsCount > 0) {

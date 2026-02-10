@@ -54,6 +54,7 @@ function emptyAddress(prefix: string): Address {
 
 export function createEmptyShipmentDraft(): ShipmentDraft {
   return {
+    businessEntityId: 3,
     senderAddress: emptyAddress('sender'),
     recipientAddress: emptyAddress('recipient'),
     parcels: [

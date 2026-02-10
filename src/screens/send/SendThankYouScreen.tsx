@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, Heading, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
@@ -13,6 +14,16 @@ type Props = NativeStackScreenProps<SendStackParamList, 'SendThankYou'>;
 export function SendThankYouScreen({ navigation }: Props) {
   const shipments = useAppStore((state) => state.lastCheckoutShipments);
   const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
+
+  useEffect(() => {
+    if (!shipments.length || checkoutFlowState !== 'shipped') {
+      navigation.replace('SendCart');
+      return;
+    }
+    const timer = setTimeout(() => setIsLoadingDocuments(false), 900);
+    return () => clearTimeout(timer);
+  }, [checkoutFlowState, navigation, shipments.length]);
 
   return (
     <AppScreen>
@@ -27,13 +38,20 @@ export function SendThankYouScreen({ navigation }: Props) {
               Documents are generated from stubbed APIs in this build.
             </Text>
           </SectionCard>
-          {shipments.map((shipment) => (
-            <DocumentsDownloadFieldset
-              key={shipment.id}
-              shipmentId={shipment.id}
-              trackingNumber={shipment.trackingNumber}
-            />
-          ))}
+          {isLoadingDocuments ? (
+            <SectionCard>
+              <Text style={{ fontWeight: '700' }}>Loading transport documents...</Text>
+              <Text style={{ color: '#667085' }}>Fetching shipment metadata and document links.</Text>
+            </SectionCard>
+          ) : (
+            shipments.map((shipment) => (
+              <DocumentsDownloadFieldset
+                key={shipment.id}
+                shipmentId={shipment.id}
+                trackingNumber={shipment.trackingNumber}
+              />
+            ))
+          )}
 
           <View style={{ gap: 8 }}>
             <PrimaryButton label="Send another shipment" onPress={() => navigation.replace('SendBasic')} />

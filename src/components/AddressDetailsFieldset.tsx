@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import type { Address, ShipmentDraft } from '../types/models';
 import { ErrorText, FieldInput, Label, PrimaryButton } from './ui';
@@ -88,6 +89,12 @@ export function AddressDetailsFieldset({
   const showSsn = shouldShowSocialSecurityNumber(address, draft.payingAddress, role);
   const showEin = shouldShowEmployerIdentificationNumber(address, role);
   const fieldErrors = errors ?? {};
+
+  useEffect(() => {
+    if (showPayerRelation && !address.payerRelation) {
+      onChangeField('payerRelation', 'sender');
+    }
+  }, [address.payerRelation, onChangeField, showPayerRelation]);
 
   return (
     <View style={{ gap: 10 }}>

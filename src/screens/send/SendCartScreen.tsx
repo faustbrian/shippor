@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, Heading, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
@@ -14,6 +15,7 @@ import { ShipmentAccordionSummaryBar } from '../../components/ShipmentAccordionS
 import { ShipmentInstructions } from '../../components/ShipmentInstructions';
 import { CartActionButtons } from '../../components/CartActionButtons';
 import { CartPaymentAndShipmentController } from '../../components/CartPaymentAndShipmentController';
+import { validateStepAddressDetails, validateStepBasic, validateStepShipmentDetails } from '../../domain/shipmentValidation';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendCart'>;
 
@@ -30,6 +32,34 @@ export function SendCartScreen({ navigation }: Props) {
   const removeCartItem = useAppStore((state) => state.removeCartItem);
   const totals = useCartTotals();
   const failedItemsCount = cart.filter((item) => item.state === 'failed-shipment-can-retry').length;
+
+  useEffect(() => {
+    const basic = validateStepBasic(draft);
+    const hasBasicErrors =
+      Object.keys(basic.senderAddress).length > 0 ||
+      Object.keys(basic.recipientAddress).length > 0 ||
+      Object.keys(basic.parcels).length > 0;
+    if (hasBasicErrors) {
+      navigation.replace('SendBasic');
+      return;
+    }
+
+    const address = validateStepAddressDetails(draft);
+    if (address.senderAddress || address.recipientAddress) {
+      navigation.replace('SendAddressDetails');
+      return;
+    }
+
+    const details = validateStepShipmentDetails(draft);
+    if (Object.keys(details).length > 0) {
+      navigation.replace('SendShipmentDetails');
+      return;
+    }
+
+    if (!draft.selectedMethod) {
+      navigation.replace('SendMethods');
+    }
+  }, [draft, navigation]);
 
   return (
     <AppScreen>

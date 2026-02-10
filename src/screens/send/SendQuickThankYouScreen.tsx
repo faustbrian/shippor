@@ -5,21 +5,25 @@ import { AppScreen, Heading, PrimaryButton, SectionCard, SecondaryButton } from 
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SendStepHeader } from '../../components/SendStepHeader';
+import { ThankYouPageController } from '../../components/ThankYouPageController';
+import { ThankYouBoxForMultipleCartItems } from '../../components/ThankYouBoxForMultipleCartItems';
+import { DocumentsDownloadFieldset } from '../../components/DocumentsDownloadFieldset';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendQuickThankYou'>;
 
 export function SendQuickThankYouScreen({ navigation }: Props) {
   const shipments = useAppStore((state) => state.lastCheckoutShipments);
+  const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
 
   useEffect(() => {
-    if (!shipments.length) {
-      navigation.replace('SendQuickStart');
+    if (!shipments.length || checkoutFlowState !== 'shipped') {
+      navigation.replace('SendCart');
       return;
     }
     const timer = setTimeout(() => setIsLoadingDocs(false), 1200);
     return () => clearTimeout(timer);
-  }, [navigation, shipments.length]);
+  }, [checkoutFlowState, navigation, shipments.length]);
 
   return (
     <AppScreen>
@@ -27,25 +31,28 @@ export function SendQuickThankYouScreen({ navigation }: Props) {
         <SendStepHeader currentStep={7} />
         <Heading>Quick Shipment Sent</Heading>
 
-        <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Transport labels</Text>
-          {isLoadingDocs ? (
-            <Text>Loading shipment documents...</Text>
-          ) : (
-            <View style={{ gap: 8 }}>
-              {shipments.map((shipment) => (
-                <View key={shipment.id} style={{ gap: 4 }}>
-                  <Text style={{ fontWeight: '700' }}>{shipment.id}</Text>
-                  <Text>Tracking: {shipment.trackingNumber}</Text>
-                  <SecondaryButton label="Download label PDF" onPress={() => {}} />
-                  <SecondaryButton label="Download receipt PDF" onPress={() => {}} />
-                </View>
-              ))}
-            </View>
-          )}
-        </SectionCard>
+        <ThankYouPageController>
+          <ThankYouBoxForMultipleCartItems shipments={shipments} />
+          <SectionCard>
+            <Text style={{ fontWeight: '700' }}>Transport labels</Text>
+            {isLoadingDocs ? (
+              <Text>Loading shipment documents...</Text>
+            ) : (
+              <View style={{ gap: 8 }}>
+                {shipments.map((shipment) => (
+                  <DocumentsDownloadFieldset
+                    key={shipment.id}
+                    shipmentId={shipment.id}
+                    trackingNumber={shipment.trackingNumber}
+                  />
+                ))}
+              </View>
+            )}
+          </SectionCard>
 
-        <PrimaryButton label="Back to send" onPress={() => navigation.replace('SendBasic')} />
+          <PrimaryButton label="Back to send" onPress={() => navigation.replace('SendBasic')} />
+          <SecondaryButton label="Create another quick shipment" onPress={() => navigation.replace('SendQuickStart')} />
+        </ThankYouPageController>
       </ScrollView>
     </AppScreen>
   );

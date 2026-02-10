@@ -18,7 +18,7 @@ export function SendQuickAddressDetailsScreen({ navigation }: Props) {
   const setDraft = useAppStore((state) => state.setDraft);
   const updateAddressField = useAppStore((state) => state.updateAddressField);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepAddressDetails> | null>(null);
-  const showPayerRelation = draft.senderAddress.type === 'business';
+  const showPayerRelation = draft.businessEntityId === 3;
 
   useEffect(() => {
     if (hasQuickHomeErrors(draft)) {

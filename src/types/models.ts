@@ -67,6 +67,7 @@ export interface ShippingMethod {
 }
 
 export interface ShipmentDraft {
+  businessEntityId: number;
   senderAddress: Address;
   recipientAddress: Address;
   parcels: Parcel[];
