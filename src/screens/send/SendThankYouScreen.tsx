@@ -9,6 +9,7 @@ type Props = NativeStackScreenProps<SendStackParamList, 'SendThankYou'>;
 
 export function SendThankYouScreen({ navigation }: Props) {
   const shipments = useAppStore((state) => state.lastCheckoutShipments);
+  const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
 
   return (
     <AppScreen>
@@ -18,16 +19,8 @@ export function SendThankYouScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Shipments sent successfully</Text>
+          <Text>Checkout state: {checkoutFlowState}</Text>
           <Text>Your labels/tracking documents are stubbed in this build.</Text>
-        </SectionCard>
-
-        <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Documents</Text>
-          <Text>Transport label PDF: available (stub)</Text>
-          <Text>Receipt PDF: available (stub)</Text>
-          <Text>Proforma invoice: conditional (stub)</Text>
-          <SecondaryButton label="Download transport label" onPress={() => {}} />
-          <SecondaryButton label="Download receipt" onPress={() => {}} />
         </SectionCard>
 
         {shipments.map((shipment) => (
@@ -36,8 +29,18 @@ export function SendThankYouScreen({ navigation }: Props) {
             <Text>Tracking: {shipment.trackingNumber}</Text>
             <Text>Status: {shipment.status}</Text>
             <Text>Service: {shipment.service}</Text>
+            <Text style={{ color: '#667085' }}>Shipment docs</Text>
+            <SecondaryButton label="Download transport label" onPress={() => {}} />
+            <SecondaryButton label="Download receipt" onPress={() => {}} />
           </SectionCard>
         ))}
+
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Documents</Text>
+          <Text>Transport label PDF: available (stub)</Text>
+          <Text>Receipt PDF: available (stub)</Text>
+          <Text>Proforma invoice: conditional (stub)</Text>
+        </SectionCard>
 
         <View style={{ gap: 8 }}>
           <PrimaryButton label="Send another shipment" onPress={() => navigation.replace('SendBasic')} />

@@ -23,9 +23,15 @@ export function SendMethodsScreen({ navigation }: Props) {
   const [shippingMethodError, setShippingMethodError] = useState<string | undefined>();
   const [pickupError, setPickupError] = useState<string | undefined>();
   const [selectedTab, setSelectedTab] = useState<'all' | 'pickup' | 'home' | 'return'>('all');
+  const [isLoadingMethods, setIsLoadingMethods] = useState(false);
 
   useEffect(() => {
-    void loadShippingMethods();
+    const load = async () => {
+      setIsLoadingMethods(true);
+      await loadShippingMethods();
+      setIsLoadingMethods(false);
+    };
+    void load();
   }, [loadShippingMethods]);
 
   useEffect(() => {
@@ -48,6 +54,39 @@ export function SendMethodsScreen({ navigation }: Props) {
           ? homeMethods
           : returnMethods;
 
+  const renderMethodList = (list: typeof methods, title: string) => {
+    if (!list.length) {
+      return null;
+    }
+
+    return (
+      <SectionCard>
+        <Text style={{ fontWeight: '700' }}>{title}</Text>
+        {list.map((method) => (
+          <ShippingMethodCard
+            key={method.id}
+            method={method}
+            isPickup={method.isPickupLocationMethod}
+            selected={draft.selectedMethod?.id === method.id}
+            onSelect={() => {
+              setDraft({ ...draft, selectedMethod: method, pickupLocationId: null });
+              setShippingMethodError(undefined);
+              setPickupError(undefined);
+            }}
+            onConfirm={() => {
+              setDraft({ ...draft, selectedMethod: method });
+              if (method.isPickupLocationMethod && !draft.pickupLocationId) {
+                setPickupError('Select pickup point address');
+                return;
+              }
+              navigation.navigate('SendCart');
+            }}
+          />
+        ))}
+      </SectionCard>
+    );
+  };
+
   return (
     <AppScreen>
       <ScrollView>
@@ -69,40 +108,45 @@ export function SendMethodsScreen({ navigation }: Props) {
               label="Fastest"
               onPress={() => {
                 setSortShippingMethodsState('deliveryTime');
-                void loadShippingMethods();
+                setIsLoadingMethods(true);
+                void loadShippingMethods().finally(() => setIsLoadingMethods(false));
               }}
             />
             <SecondaryButton
               label="Cheapest"
               onPress={() => {
                 setSortShippingMethodsState('price');
-                void loadShippingMethods();
+                setIsLoadingMethods(true);
+                void loadShippingMethods().finally(() => setIsLoadingMethods(false));
               }}
             />
           </View>
         </SectionCard>
-
-        {visibleMethods.map((method) => (
-          <ShippingMethodCard
-            key={method.id}
-            method={method}
-            isPickup={method.isPickupLocationMethod}
-            selected={draft.selectedMethod?.id === method.id}
-            onSelect={() => {
-              setDraft({ ...draft, selectedMethod: method, pickupLocationId: null });
-              setShippingMethodError(undefined);
-              setPickupError(undefined);
-            }}
-            onConfirm={() => {
-              setDraft({ ...draft, selectedMethod: method });
-              if (method.isPickupLocationMethod && !draft.pickupLocationId) {
-                setPickupError('Select pickup point address');
-                return;
-              }
-              navigation.navigate('SendCart');
-            }}
-          />
-        ))}
+        {isLoadingMethods ? (
+          <SectionCard>
+            <Text style={{ fontWeight: '700' }}>Loading delivery options...</Text>
+            <Text>Fetching available methods and prices.</Text>
+          </SectionCard>
+        ) : null}
+        {!isLoadingMethods && selectedTab === 'all' ? renderMethodList(pickupMethods, 'To pickup point') : null}
+        {!isLoadingMethods && selectedTab === 'all' ? renderMethodList(homeMethods, 'To door') : null}
+        {!isLoadingMethods && selectedTab === 'all' ? renderMethodList(returnMethods, 'Return services') : null}
+        {!isLoadingMethods && selectedTab !== 'all'
+          ? renderMethodList(
+              visibleMethods,
+              selectedTab === 'pickup'
+                ? 'To pickup point'
+                : selectedTab === 'home'
+                  ? 'To door'
+                  : 'Return services',
+            )
+          : null}
+        {!isLoadingMethods && !visibleMethods.length ? (
+          <SectionCard>
+            <Text style={{ fontWeight: '700' }}>No delivery options found</Text>
+            <Text>Try another recipient address, parcel setup, or service tab.</Text>
+          </SectionCard>
+        ) : null}
 
         <SectionCard>
           <Text>Selected: {draft.selectedMethod?.label ?? 'None'}</Text>

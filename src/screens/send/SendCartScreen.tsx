@@ -11,6 +11,7 @@ type Props = NativeStackScreenProps<SendStackParamList, 'SendCart'>;
 export function SendCartScreen({ navigation }: Props) {
   const draft = useAppStore((state) => state.currentDraft);
   const cart = useAppStore((state) => state.cart);
+  const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
   const selectedPaymentMethod = useAppStore((state) => state.selectedPaymentMethod);
   const agreeToTerms = useAppStore((state) => state.agreeToTerms);
   const addDraftToCart = useAppStore((state) => state.addDraftToCart);
@@ -22,6 +23,13 @@ export function SendCartScreen({ navigation }: Props) {
       <ScrollView>
         <SendStepHeader currentStep={5} />
         <Heading>Send - Cart & Checkout</Heading>
+
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Checkout State</Text>
+          <Text>Flow: {checkoutFlowState}</Text>
+          <Text>Selected payment: {selectedPaymentMethod || 'Not selected'}</Text>
+          <Text>Agreed to terms: {agreeToTerms ? 'Yes' : 'No'}</Text>
+        </SectionCard>
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Current shipment draft</Text>
@@ -54,12 +62,9 @@ export function SendCartScreen({ navigation }: Props) {
           <Text style={{ fontWeight: '700' }}>Total: ${totals.total.toFixed(2)}</Text>
         </SectionCard>
         <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Cart status</Text>
-          <Text>Selected payment: {selectedPaymentMethod || 'Not selected'}</Text>
-          <Text>Agreed to terms: {agreeToTerms ? 'Yes' : 'No'}</Text>
           <Text style={{ color: '#667085' }}>
-            Continue to payment to confirm gateway selection and submit all
-            shipments.
+            Continue to payment to confirm gateway selection, agree to terms,
+            and submit all shipments.
           </Text>
         </SectionCard>
 
