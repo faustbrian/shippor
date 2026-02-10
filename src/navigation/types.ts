@@ -8,6 +8,8 @@ export type AuthStackParamList = {
 export type SendStackParamList = {
   SendBasic: undefined;
   SendQuickStart: undefined;
+  SendQuickAddressDetails: undefined;
+  SendQuickShipmentDetails: undefined;
   SendQuickThankYou: undefined;
   SendAddressDetails: undefined;
   SendShipmentDetails: undefined;

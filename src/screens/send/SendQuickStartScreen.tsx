@@ -9,6 +9,8 @@ import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import type { Address } from '../../types/models';
 import { fetchAddressSuggestions } from '../../api/mockApi';
 import { getQuickSearchMapping, isSafeToChangeAddress, removeSpaces } from '../../utils/quickSearch';
+import { validateStepBasic } from '../../domain/shipmentValidation';
+import { getShippingMethodValidationErrors } from '../../domain/shippingMethods';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendQuickStart'>;
 
@@ -18,7 +20,6 @@ export function SendQuickStartScreen({ navigation }: Props) {
   const updateAddressField = useAppStore((state) => state.updateAddressField);
   const loadShippingMethods = useAppStore((state) => state.loadShippingMethods);
   const methods = useAppStore((state) => state.shippingMethods);
-  const submitQuickShipment = useAppStore((state) => state.submitQuickShipment);
   const isBusy = useAppStore((state) => state.isBusy);
   const replaceDraftAddress = useAppStore((state) => state.replaceDraftAddress);
   const [senderQuickSearch, setSenderQuickSearch] = useState('');
@@ -26,6 +27,7 @@ export function SendQuickStartScreen({ navigation }: Props) {
   const [senderSuggestions, setSenderSuggestions] = useState<Address[]>([]);
   const [recipientSuggestions, setRecipientSuggestions] = useState<Address[]>([]);
   const [quickSearchWarning, setQuickSearchWarning] = useState('');
+  const [quickHomeError, setQuickHomeError] = useState('');
 
   useEffect(() => {
     void loadShippingMethods();
@@ -83,11 +85,20 @@ export function SendQuickStartScreen({ navigation }: Props) {
     }
   };
 
-  const sendQuick = async () => {
-    const ok = await submitQuickShipment();
-    if (ok) {
-      navigation.replace('SendQuickThankYou');
+  const continueQuick = async () => {
+    const basic = validateStepBasic(draft);
+    const method = getShippingMethodValidationErrors(draft.selectedMethod);
+    const hasBasicErrors =
+      Object.keys(basic.senderAddress).length > 0 ||
+      Object.keys(basic.recipientAddress).length > 0 ||
+      Object.keys(basic.parcels).length > 0;
+    if (hasBasicErrors || method.shippingMethod) {
+      setQuickHomeError('Complete addresses, parcel details, and shipping method to continue.');
+      return;
     }
+
+    setQuickHomeError('');
+    navigation.navigate('SendQuickAddressDetails');
   };
 
   return (
@@ -235,7 +246,8 @@ export function SendQuickStartScreen({ navigation }: Props) {
           <Text>Selected: {draft.selectedMethod?.label ?? 'None'}</Text>
         </SectionCard>
 
-        <PrimaryButton label="Send Quick Shipment" onPress={sendQuick} loading={isBusy} />
+        {quickHomeError ? <Text style={{ color: '#D92D20' }}>{quickHomeError}</Text> : null}
+        <PrimaryButton label="Continue" onPress={continueQuick} loading={isBusy} />
         <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>
