@@ -10,6 +10,8 @@ import { validateStepAddressDetails, validateStepBasic, validateStepShipmentDeta
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
+import { CommercialInvoicePowerModeSection } from '../../components/CommercialInvoicePowerModeSection';
+import { canShowCod, canShowDangerousAndLimited, canShowDelivery09, shouldHideAdditionalServices } from '../../domain/additionalServices';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendQuickShipmentDetails'>;
 
@@ -21,8 +23,7 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
   const checkoutError = useAppStore((state) => state.checkoutError);
   const isBusy = useAppStore((state) => state.isBusy);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
-  const isPrivateSender = draft.senderAddress.type === 'private';
-  const isSweden = draft.senderAddress.country === 'SE' || draft.recipientAddress.country === 'SE';
+  const isUnregisteredUser = false;
 
   const updateItem = (
     index: number,
@@ -204,48 +205,95 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
                 Items total weight: {draft.items.reduce((sum, item) => sum + (item.weight ?? 0), 0).toFixed(2)} kg
               </Text>
               {draft.commerceInvoiceMode === 'power' ? (
-                <View style={{ gap: 6, borderWidth: 1, borderColor: '#EAECF0', borderRadius: 10, padding: 10 }}>
-                  <Text style={{ fontWeight: '700' }}>Commercial invoice power mode</Text>
-                  <Label>Invoice number</Label>
-                  <FieldInput
-                    value={draft.commerceInvoiceMeta.invoiceNumber}
-                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, invoiceNumber: value } })}
-                  />
-                  <Label>Export reason</Label>
-                  <FieldInput
-                    value={draft.commerceInvoiceMeta.exportReason}
-                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, exportReason: value } })}
-                  />
-                  <Label>Incoterm</Label>
-                  <FieldInput
-                    value={draft.commerceInvoiceMeta.incoterm}
-                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, incoterm: value } })}
-                  />
-                  <Label>Importer reference</Label>
-                  <FieldInput
-                    value={draft.commerceInvoiceMeta.importerReference}
-                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, importerReference: value } })}
-                  />
-                </View>
+                <CommercialInvoicePowerModeSection draft={draft} setDraft={setDraft} />
               ) : null}
             </View>
           ) : null}
         </SectionCard>
 
-        <SectionCard>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={{ fontWeight: '700', flex: 1 }}>Cash on delivery</Text>
-            <Switch
-              value={draft.addons.cashOnDelivery}
-              onValueChange={(value) =>
-                setDraft({
-                  ...draft,
-                  addons: { ...draft.addons, cashOnDelivery: value },
-                })
-              }
-            />
-          </View>
-          {draft.addons.cashOnDelivery ? (
+        {!shouldHideAdditionalServices(draft, isUnregisteredUser) ? (
+          <SectionCard>
+            <Text style={{ fontWeight: '700' }}>Additional services</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Shipment collection service</Text>
+              <Switch
+                value={Boolean(draft.addons.pickup)}
+                onValueChange={(value) =>
+                  setDraft({ ...draft, addons: { ...draft.addons, pickup: value } })
+                }
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Doorstep delivery</Text>
+              <Switch
+                value={Boolean(draft.addons.delivery)}
+                onValueChange={(value) =>
+                  setDraft({ ...draft, addons: { ...draft.addons, delivery: value } })
+                }
+              />
+            </View>
+            {canShowDelivery09(draft, isUnregisteredUser) ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text>Delivered by 9 AM</Text>
+                <Switch
+                  value={Boolean(draft.addons.delivery09)}
+                  onValueChange={(value) =>
+                    setDraft({ ...draft, addons: { ...draft.addons, delivery09: value } })
+                  }
+                />
+              </View>
+            ) : null}
+            {canShowCod(draft) ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text>Cash on delivery</Text>
+                <Switch
+                  value={draft.addons.cashOnDelivery}
+                  onValueChange={(value) =>
+                    setDraft({
+                      ...draft,
+                      addons: { ...draft.addons, cashOnDelivery: value },
+                    })
+                  }
+                />
+              </View>
+            ) : null}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Fragile</Text>
+              <Switch
+                value={Boolean(draft.addons.fragile)}
+                onValueChange={(value) =>
+                  setDraft({ ...draft, addons: { ...draft.addons, fragile: value } })
+                }
+              />
+            </View>
+            {canShowDangerousAndLimited(draft, isUnregisteredUser) ? (
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Text>Dangerous goods</Text>
+                  <Switch
+                    value={Boolean(draft.addons.dangerous)}
+                    onValueChange={(value) =>
+                      setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } })
+                    }
+                  />
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Text>Limited quantities</Text>
+                  <Switch
+                    value={Boolean(draft.addons.limitedQtys)}
+                    onValueChange={(value) =>
+                      setDraft({ ...draft, addons: { ...draft.addons, limitedQtys: value } })
+                    }
+                  />
+                </View>
+              </>
+            ) : null}
+          </SectionCard>
+        ) : null}
+
+        {canShowCod(draft) && draft.addons.cashOnDelivery ? (
+          <SectionCard>
+            <Text style={{ fontWeight: '700' }}>Cash on delivery details</Text>
             <View style={{ gap: 6 }}>
               <Label>Amount</Label>
               <FieldInput
@@ -267,88 +315,8 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
               />
               <ErrorText text={errors?.cashOnDelivery?.reference} />
             </View>
-          ) : null}
-        </SectionCard>
-
-        <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Additional services</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>Shipment collection service</Text>
-            <Switch
-              value={Boolean(draft.addons.pickup)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, pickup: value } })
-              }
-            />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>Doorstep delivery</Text>
-            <Switch
-              value={Boolean(draft.addons.delivery)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, delivery: value } })
-              }
-            />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>Delivered by 9 AM</Text>
-            <Switch
-              value={Boolean(draft.addons.delivery09)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, delivery09: value } })
-              }
-            />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>Fragile</Text>
-            <Switch
-              value={Boolean(draft.addons.fragile)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, fragile: value } })
-              }
-            />
-          </View>
-          {!isPrivateSender && !isSweden ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text>Limited quantities</Text>
-              <Switch
-                value={Boolean(draft.addons.limitedQtys)}
-                onValueChange={(value) =>
-                  setDraft({ ...draft, addons: { ...draft.addons, limitedQtys: value } })
-                }
-              />
-            </View>
-          ) : null}
-          {!isPrivateSender && !isSweden ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text>Dangerous goods</Text>
-              <Switch
-                value={Boolean(draft.addons.dangerous)}
-                onValueChange={(value) =>
-                  setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } })
-                }
-              />
-            </View>
-          ) : null}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>Proof of delivery</Text>
-            <Switch
-              value={Boolean(draft.addons.proofOfDelivery)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, proofOfDelivery: value } })
-              }
-            />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>Call before delivery</Text>
-            <Switch
-              value={Boolean(draft.addons.callBeforeDelivery)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, callBeforeDelivery: value } })
-              }
-            />
-          </View>
-        </SectionCard>
+          </SectionCard>
+        ) : null}
         {draft.addons.dangerous ? (
           <SectionCard>
             <Text style={{ fontWeight: '700' }}>Dangerous goods section</Text>
