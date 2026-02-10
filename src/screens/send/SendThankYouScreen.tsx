@@ -4,6 +4,8 @@ import { AppScreen, Heading, PrimaryButton, SectionCard, SecondaryButton } from 
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
+import { ThankYouBoxForMultipleCartItems } from '../../components/ThankYouBoxForMultipleCartItems';
+import { DocumentsDownloadFieldset } from '../../components/DocumentsDownloadFieldset';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendThankYou'>;
 
@@ -17,34 +19,22 @@ export function SendThankYouScreen({ navigation }: Props) {
         <SendStepHeader currentStep={7} />
         <Heading>Thank You</Heading>
 
+        <ThankYouBoxForMultipleCartItems shipments={shipments} />
         <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Shipments sent successfully</Text>
-          <Text>Checkout state: {checkoutFlowState}</Text>
-          <Text>Your labels/tracking documents are stubbed in this build.</Text>
+          <Text style={{ fontWeight: '700' }}>Checkout state: {checkoutFlowState}</Text>
+          <Text style={{ color: '#667085' }}>Documents are generated from stubbed APIs in this build.</Text>
         </SectionCard>
-
         {shipments.map((shipment) => (
-          <SectionCard key={shipment.id}>
-            <Text style={{ fontWeight: '700' }}>{shipment.id}</Text>
-            <Text>Tracking: {shipment.trackingNumber}</Text>
-            <Text>Status: {shipment.status}</Text>
-            <Text>Service: {shipment.service}</Text>
-            <Text style={{ color: '#667085' }}>Shipment docs</Text>
-            <SecondaryButton label="Download transport label" onPress={() => {}} />
-            <SecondaryButton label="Download receipt" onPress={() => {}} />
-          </SectionCard>
+          <DocumentsDownloadFieldset
+            key={shipment.id}
+            shipmentId={shipment.id}
+            trackingNumber={shipment.trackingNumber}
+          />
         ))}
-
-        <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Documents</Text>
-          <Text>Transport label PDF: available (stub)</Text>
-          <Text>Receipt PDF: available (stub)</Text>
-          <Text>Proforma invoice: conditional (stub)</Text>
-        </SectionCard>
 
         <View style={{ gap: 8 }}>
           <PrimaryButton label="Send another shipment" onPress={() => navigation.replace('SendBasic')} />
-          <PrimaryButton label="Back to flow start" onPress={() => navigation.navigate('SendBasic')} />
+          <SecondaryButton label="Back to flow start" onPress={() => navigation.navigate('SendBasic')} />
         </View>
       </ScrollView>
     </AppScreen>

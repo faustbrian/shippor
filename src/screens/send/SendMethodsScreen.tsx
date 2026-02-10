@@ -10,6 +10,7 @@ import { ShippingMethodCard } from '../../components/ShippingMethodCard';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { ShippingMethodInstructionsPanel } from '../../components/ShippingMethodInstructionsPanel';
 import { Switch } from 'react-native';
+import { ShippingMethodsLoadingPlaceholder } from '../../components/ShippingMethodsLoadingPlaceholder';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendMethods'>;
 
@@ -204,10 +205,13 @@ export function SendMethodsScreen({ navigation }: Props) {
           </View>
         </SectionCard>
         {isLoadingMethods ? (
-          <SectionCard>
-            <Text style={{ fontWeight: '700' }}>Loading delivery options...</Text>
-            <Text>Fetching available methods and prices.</Text>
-          </SectionCard>
+          <>
+            <SectionCard>
+              <Text style={{ fontWeight: '700' }}>Loading delivery options...</Text>
+              <Text>Fetching available methods and prices.</Text>
+            </SectionCard>
+            <ShippingMethodsLoadingPlaceholder />
+          </>
         ) : null}
         {!isLoadingMethods && selectedTab === 'all' ? renderMethodList(pickupMethods, 'To pickup point') : null}
         {!isLoadingMethods && selectedTab === 'all' ? renderMethodList(homeMethods, 'To door') : null}

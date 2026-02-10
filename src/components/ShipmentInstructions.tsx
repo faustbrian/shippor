@@ -1,0 +1,13 @@
+import { Text } from 'react-native';
+import { SectionCard } from './ui';
+
+export function ShipmentInstructions() {
+  return (
+    <SectionCard>
+      <Text style={{ fontWeight: '700' }}>Shipment instructions</Text>
+      <Text style={{ color: '#475467' }}>
+        Review failed shipments before payment. Successful shipments can be paid and sent immediately.
+      </Text>
+    </SectionCard>
+  );
+}

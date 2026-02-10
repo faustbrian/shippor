@@ -10,6 +10,9 @@ import { PaymentStateBanner } from '../../components/PaymentStateBanner';
 import { EmptyCartCard } from '../../components/EmptyCartCard';
 import { CartLoadingCard } from '../../components/CartLoadingCard';
 import { BackAndTryAgainCard } from '../../components/BackAndTryAgainCard';
+import { ShipmentAccordionSummaryBar } from '../../components/ShipmentAccordionSummaryBar';
+import { ShipmentInstructions } from '../../components/ShipmentInstructions';
+import { CartActionButtons } from '../../components/CartActionButtons';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendCart'>;
 
@@ -58,18 +61,13 @@ export function SendCartScreen({ navigation }: Props) {
             />
           ) : (
             cart.map((item) => (
-              <View key={item.id} style={{ borderBottomWidth: 1, borderBottomColor: '#EEE', paddingVertical: 8 }}>
-                <Text style={{ fontWeight: '700' }}>{item.title}</Text>
-                <Text>{item.draft.selectedMethod?.label}</Text>
-                <Text>${item.price.toFixed(2)}</Text>
-                <Text
-                  style={{
-                    color: item.state === 'failed-shipment-can-retry' ? '#D92D20' : '#027A48',
-                    fontWeight: '700',
-                  }}
-                >
-                  {item.state}
-                </Text>
+              <View key={item.id} style={{ borderWidth: 1, borderColor: '#EAECF0', borderRadius: 10, padding: 10, gap: 8 }}>
+                <ShipmentAccordionSummaryBar
+                  title={item.title}
+                  price={item.price}
+                  status={item.state}
+                />
+                <Text style={{ color: '#475467' }}>Service: {item.draft.selectedMethod?.label || '-'}</Text>
                 {cartItemErrors[item.id] ? (
                   <Text style={{ color: '#D92D20' }}>{cartItemErrors[item.id]}</Text>
                 ) : null}
@@ -87,6 +85,7 @@ export function SendCartScreen({ navigation }: Props) {
             ))
           )}
         </SectionCard>
+        <ShipmentInstructions />
         {checkoutFlowState === 'pending' ? <CartLoadingCard /> : null}
         {checkoutFlowState === 'failed-payment' && checkoutError ? (
           <BackAndTryAgainCard
@@ -105,15 +104,11 @@ export function SendCartScreen({ navigation }: Props) {
           state={checkoutFlowState}
           selectedPayment={selectedPaymentMethod}
         />
-        <SectionCard>
-          <Text style={{ color: '#667085' }}>
-            Continue to payment to confirm gateway selection, agree to terms,
-            and submit all shipments.
-          </Text>
-        </SectionCard>
-
-        <PrimaryButton label="Continue to payment" onPress={() => navigation.navigate('SendPayment')} disabled={!cart.length} />
-        <SecondaryButton label="Back to methods" onPress={() => navigation.navigate('SendMethods')} />
+        <CartActionButtons
+          onContinue={() => navigation.navigate('SendPayment')}
+          onBack={() => navigation.navigate('SendMethods')}
+          disableContinue={!cart.length}
+        />
         <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>
