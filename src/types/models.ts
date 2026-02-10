@@ -21,6 +21,7 @@ export interface Address {
   socialSecurityNumber?: string;
   employerIdentificationNumber?: string;
   payerRelation?: string;
+  billingEmail?: string;
   vatTaxIdType?: string;
 }
 

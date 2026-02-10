@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard, ui } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
-import { validateStepShipmentDetails } from '../../domain/shipmentValidation';
+import { validateStepAddressDetails, validateStepBasic, validateStepShipmentDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
@@ -18,6 +18,23 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
   const isPrivateSender = draft.senderAddress.type === 'private';
   const isSweden = draft.senderAddress.country === 'SE' || draft.recipientAddress.country === 'SE';
+
+  useEffect(() => {
+    const basic = validateStepBasic(draft);
+    const hasBasicErrors =
+      Object.keys(basic.senderAddress).length > 0 ||
+      Object.keys(basic.recipientAddress).length > 0 ||
+      Object.keys(basic.parcels).length > 0;
+    if (hasBasicErrors) {
+      navigation.replace('SendBasic');
+      return;
+    }
+
+    const address = validateStepAddressDetails(draft);
+    if (address.senderAddress || address.recipientAddress) {
+      navigation.replace('SendAddressDetails');
+    }
+  }, [draft, navigation]);
 
   const updateItem = (
     index: number,

@@ -6,7 +6,7 @@ import { SendStepHeader } from '../../components/SendStepHeader';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { BackAndTryAgainCard } from '../../components/BackAndTryAgainCard';
 import { hasQuickAddressErrors, hasQuickHomeErrors } from '../../domain/quickFlow';
-import { validateStepShipmentDetails } from '../../domain/shipmentValidation';
+import { validateStepAddressDetails, validateStepBasic, validateStepShipmentDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
@@ -88,6 +88,23 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
       return;
     }
     if (hasQuickAddressErrors(draft)) {
+      navigation.replace('SendQuickAddressDetails');
+    }
+  }, [draft, navigation]);
+
+  useEffect(() => {
+    const basic = validateStepBasic(draft);
+    const hasBasicErrors =
+      Object.keys(basic.senderAddress).length > 0 ||
+      Object.keys(basic.recipientAddress).length > 0 ||
+      Object.keys(basic.parcels).length > 0;
+    if (hasBasicErrors) {
+      navigation.replace('SendQuickStart');
+      return;
+    }
+
+    const address = validateStepAddressDetails(draft);
+    if (address.senderAddress || address.recipientAddress) {
       navigation.replace('SendQuickAddressDetails');
     }
   }, [draft, navigation]);

@@ -15,6 +15,10 @@ const countryDialCode: Record<string, string> = {
   HK: '+852',
 };
 
+export function getCountryDialCode(country: string): string {
+  return countryDialCode[country] ?? '';
+}
+
 export function showStateField(country: string): boolean {
   return countryMeta.stateRequired.includes(country);
 }
@@ -48,4 +52,18 @@ export function normalizePhoneForCountry(phone: string, country: string): string
   }
 
   return `${dial}${local}`;
+}
+
+export function stripDialCodePrefix(phone: string, country: string): string {
+  const compact = phone.replace(/\s+/g, '');
+  const dial = getCountryDialCode(country);
+  if (!compact || !dial) {
+    return compact;
+  }
+
+  if (compact.startsWith(dial)) {
+    return compact.slice(dial.length);
+  }
+
+  return compact.replace(/^\+/, '');
 }

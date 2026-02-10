@@ -47,6 +47,8 @@ function emptyAddress(prefix: string): Address {
     socialSecurityNumber: '',
     employerIdentificationNumber: '',
     payerRelation: '',
+    billingEmail: '',
+    vatTaxIdType: '',
   };
 }
 
