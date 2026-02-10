@@ -16,6 +16,11 @@ export interface Address {
   state?: string;
   postalCode: string;
   country: string;
+  eori?: string;
+  vatNumber?: string;
+  socialSecurityNumber?: string;
+  employerIdentificationNumber?: string;
+  payerRelation?: string;
 }
 
 export interface Parcel {

@@ -37,9 +37,16 @@ function emptyAddress(prefix: string): Address {
     email: '',
     phone: '',
     street: '',
+    street2: '',
     city: '',
+    state: '',
     postalCode: '',
     country: '',
+    eori: '',
+    vatNumber: '',
+    socialSecurityNumber: '',
+    employerIdentificationNumber: '',
+    payerRelation: '',
   };
 }
 

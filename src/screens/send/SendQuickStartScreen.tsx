@@ -8,6 +8,7 @@ import { SendStepHeader } from '../../components/SendStepHeader';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import type { Address } from '../../types/models';
 import { fetchAddressSuggestions } from '../../api/mockApi';
+import { getQuickSearchMapping, isSafeToChangeAddress, removeSpaces } from '../../utils/quickSearch';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendQuickStart'>;
 
@@ -24,36 +25,53 @@ export function SendQuickStartScreen({ navigation }: Props) {
   const [recipientQuickSearch, setRecipientQuickSearch] = useState('');
   const [senderSuggestions, setSenderSuggestions] = useState<Address[]>([]);
   const [recipientSuggestions, setRecipientSuggestions] = useState<Address[]>([]);
+  const [quickSearchWarning, setQuickSearchWarning] = useState('');
 
   useEffect(() => {
     void loadShippingMethods();
   }, [loadShippingMethods]);
 
-  const normalize = (value: string) => value.replace(/\s+/g, '');
-
   const runQuickSearch = async (role: 'sender' | 'recipient', typedValue: string) => {
-    const country = role === 'sender' ? draft.senderAddress.country : draft.recipientAddress.country;
+    const existingAddress = role === 'sender' ? draft.senderAddress : draft.recipientAddress;
+    const country = existingAddress.country;
+    const [mappedField] = getQuickSearchMapping(country);
+    if (!mappedField) {
+      return;
+    }
     const suggestions = await fetchAddressSuggestions(typedValue, country);
 
+    const applyIfSafe = (candidate: Address) => {
+      const safeToChange = isSafeToChangeAddress(existingAddress, candidate, ['country']);
+      if (!safeToChange) {
+        setQuickSearchWarning('Suggestion blocked because country mismatch is not allowed.');
+        return false;
+      }
+      replaceDraftAddress(role, candidate);
+      setQuickSearchWarning('');
+      return true;
+    };
+
     if (suggestions.length === 1) {
-      replaceDraftAddress(role, suggestions[0]);
-      if (role === 'sender') {
-        setSenderSuggestions([]);
-      } else {
-        setRecipientSuggestions([]);
+      if (applyIfSafe(suggestions[0])) {
+        if (role === 'sender') {
+          setSenderSuggestions([]);
+        } else {
+          setRecipientSuggestions([]);
+        }
       }
       return;
     }
 
     if (
       suggestions.length > 1 &&
-      normalize(suggestions[0].postalCode.toLowerCase()) === normalize(typedValue.toLowerCase())
+      removeSpaces(String(suggestions[0][mappedField]).toLowerCase()) === removeSpaces(typedValue.toLowerCase())
     ) {
-      replaceDraftAddress(role, suggestions[0]);
-      if (role === 'sender') {
-        setSenderSuggestions([]);
-      } else {
-        setRecipientSuggestions([]);
+      if (applyIfSafe(suggestions[0])) {
+        if (role === 'sender') {
+          setSenderSuggestions([]);
+        } else {
+          setRecipientSuggestions([]);
+        }
       }
       return;
     }
@@ -80,23 +98,44 @@ export function SendQuickStartScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Addresses</Text>
-          <Label>Sender quick search</Label>
-          <FieldInput
-            value={senderQuickSearch}
-            onChangeText={(value) => {
-              setSenderQuickSearch(value);
-              void runQuickSearch('sender', value);
-            }}
-            placeholder="Sender postal/street/city"
-          />
+          {(() => {
+            const [mappedField, label] = getQuickSearchMapping(draft.senderAddress.country);
+            if (!mappedField) {
+              return null;
+            }
+
+            return (
+              <View style={{ gap: 6 }}>
+                <Label>Sender quick search ({label.toLowerCase()} / street / city)</Label>
+                <FieldInput
+                  value={senderQuickSearch}
+                  onChangeText={(value) => {
+                    setSenderQuickSearch(value);
+                    void runQuickSearch('sender', value);
+                  }}
+                  placeholder={`Sender ${label.toLowerCase()}/street/city`}
+                />
+              </View>
+            );
+          })()}
           {senderSuggestions.map((entry) => (
             <SecondaryButton
               key={`quick-sender-${entry.id}`}
               label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
               onPress={() => {
+                const [mappedField] = getQuickSearchMapping(draft.senderAddress.country);
+                if (!mappedField) {
+                  return;
+                }
+                const safe = isSafeToChangeAddress(draft.senderAddress, entry, ['country']);
+                if (!safe) {
+                  setQuickSearchWarning('Suggestion blocked because country mismatch is not allowed.');
+                  return;
+                }
                 replaceDraftAddress('sender', entry);
                 setSenderSuggestions([]);
-                setSenderQuickSearch(entry.postalCode);
+                setSenderQuickSearch(String(entry[mappedField]));
+                setQuickSearchWarning('');
               }}
             />
           ))}
@@ -104,23 +143,44 @@ export function SendQuickStartScreen({ navigation }: Props) {
           <FieldInput value={draft.senderAddress.name} onChangeText={(v) => updateAddressField('sender', 'name', v)} />
           <Label>Sender city</Label>
           <FieldInput value={draft.senderAddress.city} onChangeText={(v) => updateAddressField('sender', 'city', v)} />
-          <Label>Recipient quick search</Label>
-          <FieldInput
-            value={recipientQuickSearch}
-            onChangeText={(value) => {
-              setRecipientQuickSearch(value);
-              void runQuickSearch('recipient', value);
-            }}
-            placeholder="Recipient postal/street/city"
-          />
+          {(() => {
+            const [mappedField, label] = getQuickSearchMapping(draft.recipientAddress.country);
+            if (!mappedField) {
+              return null;
+            }
+
+            return (
+              <View style={{ gap: 6 }}>
+                <Label>Recipient quick search ({label.toLowerCase()} / street / city)</Label>
+                <FieldInput
+                  value={recipientQuickSearch}
+                  onChangeText={(value) => {
+                    setRecipientQuickSearch(value);
+                    void runQuickSearch('recipient', value);
+                  }}
+                  placeholder={`Recipient ${label.toLowerCase()}/street/city`}
+                />
+              </View>
+            );
+          })()}
           {recipientSuggestions.map((entry) => (
             <SecondaryButton
               key={`quick-recipient-${entry.id}`}
               label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
               onPress={() => {
+                const [mappedField] = getQuickSearchMapping(draft.recipientAddress.country);
+                if (!mappedField) {
+                  return;
+                }
+                const safe = isSafeToChangeAddress(draft.recipientAddress, entry, ['country']);
+                if (!safe) {
+                  setQuickSearchWarning('Suggestion blocked because country mismatch is not allowed.');
+                  return;
+                }
                 replaceDraftAddress('recipient', entry);
                 setRecipientSuggestions([]);
-                setRecipientQuickSearch(entry.postalCode);
+                setRecipientQuickSearch(String(entry[mappedField]));
+                setQuickSearchWarning('');
               }}
             />
           ))}
@@ -128,6 +188,7 @@ export function SendQuickStartScreen({ navigation }: Props) {
           <FieldInput value={draft.recipientAddress.name} onChangeText={(v) => updateAddressField('recipient', 'name', v)} />
           <Label>Recipient city</Label>
           <FieldInput value={draft.recipientAddress.city} onChangeText={(v) => updateAddressField('recipient', 'city', v)} />
+          {quickSearchWarning ? <Text style={{ color: '#D92D20' }}>{quickSearchWarning}</Text> : null}
         </SectionCard>
 
         <SectionCard>
