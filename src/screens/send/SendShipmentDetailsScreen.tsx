@@ -15,10 +15,10 @@ type Props = NativeStackScreenProps<SendStackParamList, 'SendShipmentDetails'>;
 
 export function SendShipmentDetailsScreen({ navigation }: Props) {
   const draft = useAppStore((state) => state.currentDraft);
+  const isUnregisteredUser = useAppStore((state) => state.isUnregisteredUser);
   const setDraft = useAppStore((state) => state.setDraft);
   const updateDraftField = useAppStore((state) => state.updateDraftField);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
-  const isUnregisteredUser = false;
 
   useEffect(() => {
     const basic = validateStepBasic(draft);

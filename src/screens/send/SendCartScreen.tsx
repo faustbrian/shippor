@@ -66,7 +66,12 @@ export function SendCartScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <SendStepHeader currentStep={5} />
         <Heading>Send - Cart & Checkout</Heading>
-        <CartPaymentAndShipmentController>
+        <CartPaymentAndShipmentController
+          state={checkoutFlowState}
+          hasCheckoutError={Boolean(checkoutError)}
+          isBusy={checkoutFlowState === 'pending'}
+          itemCount={cart.length}
+        >
           <SectionCard>
             <Text style={{ fontWeight: '800' }}>Checkout State</Text>
             <Text style={{ color: '#475467' }}>Flow: {checkoutFlowState}</Text>

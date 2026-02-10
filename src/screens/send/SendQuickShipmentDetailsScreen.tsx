@@ -17,13 +17,13 @@ type Props = NativeStackScreenProps<SendStackParamList, 'SendQuickShipmentDetail
 
 export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
   const draft = useAppStore((state) => state.currentDraft);
+  const isUnregisteredUser = useAppStore((state) => state.isUnregisteredUser);
   const setDraft = useAppStore((state) => state.setDraft);
   const updateDraftField = useAppStore((state) => state.updateDraftField);
   const submitQuickShipment = useAppStore((state) => state.submitQuickShipment);
   const checkoutError = useAppStore((state) => state.checkoutError);
   const isBusy = useAppStore((state) => state.isBusy);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
-  const isUnregisteredUser = false;
 
   const updateItem = (
     index: number,

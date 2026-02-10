@@ -3,6 +3,7 @@ import { createEmptyShipmentDraft } from '../domain/shipmentValidation';
 import type {
   Address,
   DashboardData,
+  ShipmentDocumentMeta,
   ShipmentDraft,
   ShipmentRecord,
   ShippingMethod,
@@ -381,6 +382,34 @@ export async function trackByNumber(trackingNumber: string): Promise<TrackingEve
     trackingEvents.filter(
       (event) => event.trackingNumber.toLowerCase() === trackingNumber.trim().toLowerCase(),
     ),
+  );
+}
+
+export async function fetchDocumentsData(shipmentIds: string[]): Promise<ShipmentDocumentMeta[]> {
+  const selected = shipments.filter((shipment) => shipmentIds.includes(shipment.id));
+  return delay(
+    selected.map((shipment) => ({
+      shipmentId: shipment.id,
+      trackingNumber: shipment.trackingNumber,
+      documents: [
+        {
+          type: 'label',
+          name: `${shipment.id}-label.pdf`,
+          url: `https://example.test/docs/${shipment.id}/label.pdf`,
+        },
+        {
+          type: 'receipt',
+          name: `${shipment.id}-receipt.pdf`,
+          url: `https://example.test/docs/${shipment.id}/receipt.pdf`,
+        },
+        {
+          type: 'invoice',
+          name: `${shipment.id}-invoice.pdf`,
+          url: `https://example.test/docs/${shipment.id}/invoice.pdf`,
+        },
+      ],
+    })),
+    450,
   );
 }
 

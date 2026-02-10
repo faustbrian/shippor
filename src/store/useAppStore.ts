@@ -34,6 +34,7 @@ import type { PickupLocation, SortShippingMethodsState } from '../domain/shippin
 interface AppState {
   user: User | null;
   token: string | null;
+  isUnregisteredUser: boolean;
   isBusy: boolean;
   authMessage: string | null;
   dashboardBalance: number;
@@ -100,6 +101,7 @@ function draftToCartItem(draft: ShipmentDraft): CartItem {
 export const useAppStore = create<AppState>((set, get) => ({
   user: null,
   token: null,
+  isUnregisteredUser: false,
   isBusy: false,
   authMessage: null,
   dashboardBalance: 0,
@@ -122,14 +124,24 @@ export const useAppStore = create<AppState>((set, get) => ({
   async login(email, password) {
     set({ isBusy: true, authMessage: null });
     const response = await login(email, password);
-    set({ user: response.user, token: response.token, isBusy: false });
+    set({
+      user: response.user,
+      token: response.token,
+      isUnregisteredUser: email.toLowerCase().includes('guest'),
+      isBusy: false,
+    });
     await get().hydrateApp();
   },
 
   async register(name, email, password) {
     set({ isBusy: true, authMessage: null });
     const response = await register(name, email, password);
-    set({ user: response.user, token: response.token, isBusy: false });
+    set({
+      user: response.user,
+      token: response.token,
+      isUnregisteredUser: email.toLowerCase().includes('guest'),
+      isBusy: false,
+    });
     await get().hydrateApp();
   },
 
@@ -149,6 +161,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       user: null,
       token: null,
+      isUnregisteredUser: false,
       shipments: [],
       trackingEvents: [],
       trackingSearchResult: [],

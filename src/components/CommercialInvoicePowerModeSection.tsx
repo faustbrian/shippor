@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import type { ShipmentDraft } from '../types/models';
 import { FieldInput, Label } from './ui';
@@ -55,6 +56,77 @@ export function CommercialInvoicePowerModeSection({
   draft: ShipmentDraft;
   setDraft: (draft: ShipmentDraft) => void;
 }) {
+  useEffect(() => {
+    const sender = draft.senderAddress;
+    const receiver = draft.recipientAddress;
+
+    const maybe = <T extends string>(current: T, fallback: string): T =>
+      (current || fallback || '') as T;
+
+    const nextSender = {
+      ...draft.commerceInvoiceMeta.sender,
+      company: maybe(draft.commerceInvoiceMeta.sender.company, sender.organization ?? ''),
+      name: maybe(draft.commerceInvoiceMeta.sender.name, sender.name),
+      address1: maybe(draft.commerceInvoiceMeta.sender.address1, sender.street),
+      address2: maybe(draft.commerceInvoiceMeta.sender.address2, sender.street2 ?? ''),
+      city: maybe(draft.commerceInvoiceMeta.sender.city, sender.city),
+      postcode: maybe(draft.commerceInvoiceMeta.sender.postcode, sender.postalCode),
+      state: maybe(draft.commerceInvoiceMeta.sender.state, sender.state ?? ''),
+      country: maybe(draft.commerceInvoiceMeta.sender.country, sender.country),
+      phone: maybe(draft.commerceInvoiceMeta.sender.phone, sender.phone),
+      email: maybe(draft.commerceInvoiceMeta.sender.email, sender.email),
+      vatNumber: maybe(draft.commerceInvoiceMeta.sender.vatNumber, sender.vatNumber ?? ''),
+      eoriNumber: maybe(draft.commerceInvoiceMeta.sender.eoriNumber, sender.eori ?? ''),
+    };
+
+    const nextReceiver = {
+      ...draft.commerceInvoiceMeta.receiver,
+      company: maybe(draft.commerceInvoiceMeta.receiver.company, receiver.organization ?? ''),
+      name: maybe(draft.commerceInvoiceMeta.receiver.name, receiver.name),
+      address1: maybe(draft.commerceInvoiceMeta.receiver.address1, receiver.street),
+      address2: maybe(draft.commerceInvoiceMeta.receiver.address2, receiver.street2 ?? ''),
+      city: maybe(draft.commerceInvoiceMeta.receiver.city, receiver.city),
+      postcode: maybe(draft.commerceInvoiceMeta.receiver.postcode, receiver.postalCode),
+      state: maybe(draft.commerceInvoiceMeta.receiver.state, receiver.state ?? ''),
+      country: maybe(draft.commerceInvoiceMeta.receiver.country, receiver.country),
+      phone: maybe(draft.commerceInvoiceMeta.receiver.phone, receiver.phone),
+      email: maybe(draft.commerceInvoiceMeta.receiver.email, receiver.email),
+      vatNumber: maybe(draft.commerceInvoiceMeta.receiver.vatNumber, receiver.vatNumber ?? ''),
+      eoriNumber: maybe(draft.commerceInvoiceMeta.receiver.eoriNumber, receiver.eori ?? ''),
+    };
+
+    const nextDelivery = {
+      ...draft.commerceInvoiceMeta.delivery,
+      company: maybe(draft.commerceInvoiceMeta.delivery.company, receiver.organization ?? ''),
+      name: maybe(draft.commerceInvoiceMeta.delivery.name, receiver.name),
+      address1: maybe(draft.commerceInvoiceMeta.delivery.address1, receiver.street),
+      address2: maybe(draft.commerceInvoiceMeta.delivery.address2, receiver.street2 ?? ''),
+      city: maybe(draft.commerceInvoiceMeta.delivery.city, receiver.city),
+      postcode: maybe(draft.commerceInvoiceMeta.delivery.postcode, receiver.postalCode),
+      state: maybe(draft.commerceInvoiceMeta.delivery.state, receiver.state ?? ''),
+      country: maybe(draft.commerceInvoiceMeta.delivery.country, receiver.country),
+      phone: maybe(draft.commerceInvoiceMeta.delivery.phone, receiver.phone),
+      email: maybe(draft.commerceInvoiceMeta.delivery.email, receiver.email),
+      vatNumber: maybe(draft.commerceInvoiceMeta.delivery.vatNumber, receiver.vatNumber ?? ''),
+      eoriNumber: maybe(draft.commerceInvoiceMeta.delivery.eoriNumber, receiver.eori ?? ''),
+    };
+
+    const nextMeta = {
+      ...draft.commerceInvoiceMeta,
+      incoterm: maybe(draft.commerceInvoiceMeta.incoterm, draft.incoterms),
+      sender: nextSender,
+      receiver: nextReceiver,
+      delivery: nextDelivery,
+    };
+
+    if (JSON.stringify(nextMeta) !== JSON.stringify(draft.commerceInvoiceMeta)) {
+      setDraft({
+        ...draft,
+        commerceInvoiceMeta: nextMeta,
+      });
+    }
+  }, [draft, setDraft]);
+
   const updateMeta = (field: keyof ShipmentDraft['commerceInvoiceMeta'], value: string) => {
     setDraft({
       ...draft,

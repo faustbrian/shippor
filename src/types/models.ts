@@ -193,6 +193,16 @@ export interface TrackingEvent {
   timestamp: string;
 }
 
+export interface ShipmentDocumentMeta {
+  shipmentId: string;
+  trackingNumber: string;
+  documents: {
+    type: 'label' | 'receipt' | 'invoice';
+    name: string;
+    url: string;
+  }[];
+}
+
 export interface User {
   id: string;
   name: string;
