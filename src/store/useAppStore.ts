@@ -75,6 +75,7 @@ interface AppState {
   setAgreeToTerms: (value: boolean) => void;
   resetCheckoutFailure: () => void;
   addDraftToCart: () => void;
+  retryCartItem: (id: string) => void;
   removeCartItem: (id: string) => void;
   submitCart: () => Promise<boolean>;
 
@@ -308,6 +309,25 @@ export const useAppStore = create<AppState>((set, get) => ({
       shippingMethods: [],
       pickupLocations: [],
     }));
+  },
+
+  retryCartItem(id) {
+    set((state) => {
+      const item = state.cart.find((cartItem) => cartItem.id === id);
+      if (!item) {
+        return state;
+      }
+
+      return {
+        currentDraft: JSON.parse(JSON.stringify(item.draft)) as ShipmentDraft,
+        cart: state.cart.filter((cartItem) => cartItem.id !== id),
+        cartItemErrors: Object.fromEntries(
+          Object.entries(state.cartItemErrors).filter(([key]) => key !== id),
+        ),
+        checkoutError: null,
+        checkoutFlowState: 'not-started',
+      };
+    });
   },
 
   removeCartItem(id) {

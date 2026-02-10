@@ -18,6 +18,7 @@ export function SendCartScreen({ navigation }: Props) {
   const selectedPaymentMethod = useAppStore((state) => state.selectedPaymentMethod);
   const agreeToTerms = useAppStore((state) => state.agreeToTerms);
   const addDraftToCart = useAppStore((state) => state.addDraftToCart);
+  const retryCartItem = useAppStore((state) => state.retryCartItem);
   const removeCartItem = useAppStore((state) => state.removeCartItem);
   const totals = useCartTotals();
   const failedItemsCount = cart.filter((item) => item.state === 'failed-shipment-can-retry').length;
@@ -62,6 +63,15 @@ export function SendCartScreen({ navigation }: Props) {
                 </Text>
                 {cartItemErrors[item.id] ? (
                   <Text style={{ color: '#D92D20' }}>{cartItemErrors[item.id]}</Text>
+                ) : null}
+                {item.state === 'failed-shipment-can-retry' ? (
+                  <PrimaryButton
+                    label="Retry this item"
+                    onPress={() => {
+                      retryCartItem(item.id);
+                      navigation.navigate('SendShipmentDetails');
+                    }}
+                  />
                 ) : null}
                 <SecondaryButton label="Remove" onPress={() => removeCartItem(item.id)} />
               </View>

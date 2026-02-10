@@ -33,6 +33,10 @@ export function SendPaymentScreen({ navigation }: Props) {
   const failedItemsCount = cart.filter((item) => item.state === 'failed-shipment-can-retry').length;
 
   const submit = async () => {
+    if (failedItemsCount > 0) {
+      navigation.navigate('SendCart');
+      return;
+    }
     const ok = await submitCart();
     if (ok) {
       navigation.replace('SendThankYou');
@@ -87,6 +91,12 @@ export function SendPaymentScreen({ navigation }: Props) {
               Failed cart items detected. Update failed items or retry non-failing items.
             </Text>
           ) : null}
+          {failedItemsCount > 0 ? (
+            <PrimaryButton
+              label="Go to failed items"
+              onPress={() => navigation.navigate('SendCart')}
+            />
+          ) : null}
         </SectionCard>
 
         <SectionCard>
@@ -109,7 +119,12 @@ export function SendPaymentScreen({ navigation }: Props) {
         {cart[0]?.draft ? <ShippingFlowSidePanel draft={cart[0].draft} /> : null}
 
         <ErrorText text={checkoutError ?? undefined} />
-        <PrimaryButton label="Pay & Send" onPress={submit} loading={isBusy} disabled={!cart.length} />
+        <PrimaryButton
+          label={failedItemsCount > 0 ? 'Fix failed items first' : 'Pay & Send'}
+          onPress={submit}
+          loading={isBusy}
+          disabled={!cart.length}
+        />
       </ScrollView>
     </AppScreen>
   );
