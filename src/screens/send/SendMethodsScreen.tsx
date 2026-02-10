@@ -12,6 +12,7 @@ import { ShippingMethodInstructionsPanel } from '../../components/ShippingMethod
 import { Switch } from 'react-native';
 import { ShippingMethodsLoadingPlaceholder } from '../../components/ShippingMethodsLoadingPlaceholder';
 import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
+import { validateStepAddressDetails, validateStepBasic, validateStepShipmentDetails } from '../../domain/shipmentValidation';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendMethods'>;
 
@@ -60,13 +61,35 @@ export function SendMethodsScreen({ navigation }: Props) {
   };
 
   useEffect(() => {
+    const basic = validateStepBasic(draft);
+    const hasBasicErrors =
+      Object.keys(basic.senderAddress).length > 0 ||
+      Object.keys(basic.recipientAddress).length > 0 ||
+      Object.keys(basic.parcels).length > 0;
+    if (hasBasicErrors) {
+      navigation.replace('SendBasic');
+      return;
+    }
+
+    const address = validateStepAddressDetails(draft);
+    if (address.senderAddress || address.recipientAddress) {
+      navigation.replace('SendAddressDetails');
+      return;
+    }
+
+    const details = validateStepShipmentDetails(draft);
+    if (Object.keys(details).length > 0) {
+      navigation.replace('SendShipmentDetails');
+      return;
+    }
+
     const load = async () => {
       setIsLoadingMethods(true);
       await loadShippingMethods();
       setIsLoadingMethods(false);
     };
     void load();
-  }, [loadShippingMethods]);
+  }, [draft, loadShippingMethods, navigation]);
 
   useEffect(() => {
     if (draft.selectedMethod?.isPickupLocationMethod) {

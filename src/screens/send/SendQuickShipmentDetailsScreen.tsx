@@ -139,9 +139,13 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
           <Label>Declared value</Label>
           <FieldInput value={draft.value} onChangeText={(v) => updateDraftField('value', v)} keyboardType="numeric" />
           <ErrorText text={errors?.value} />
+          <Label>Currency</Label>
+          <FieldInput value={draft.currency} onChangeText={(v) => updateDraftField('currency', v.toUpperCase())} autoCapitalize="characters" />
           <Label>Reference</Label>
           <FieldInput value={draft.reference} onChangeText={(v) => updateDraftField('reference', v)} />
           <ErrorText text={errors?.reference} />
+          <Label>Incoterms</Label>
+          <FieldInput value={draft.incoterms} onChangeText={(v) => updateDraftField('incoterms', v.toUpperCase())} autoCapitalize="characters" />
         </SectionCard>
 
         <SectionCard>

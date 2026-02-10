@@ -84,6 +84,22 @@ export function ShippingMethodCard({
           {method.infoText?.map((text) => (
             <Text key={text} style={{ color: '#475467' }}>{text}</Text>
           ))}
+          {method.dropOffTimes?.length ? (
+            <View style={{ gap: 4 }}>
+              <Text style={{ fontWeight: '700', color: '#344054' }}>Drop-off times</Text>
+              {method.dropOffTimes.map((line) => (
+                <Text key={line} style={{ color: '#475467' }}>{line}</Text>
+              ))}
+            </View>
+          ) : null}
+          {method.openingHours?.length ? (
+            <View style={{ gap: 4 }}>
+              <Text style={{ fontWeight: '700', color: '#344054' }}>Opening hours</Text>
+              {method.openingHours.map((line) => (
+                <Text key={line} style={{ color: '#475467' }}>{line}</Text>
+              ))}
+            </View>
+          ) : null}
           <View style={{ gap: 8 }}>
             <PrimaryButton label="Confirm and continue" onPress={onConfirm} />
             <Pressable onPress={() => setExpanded(false)} style={{ alignItems: 'center', paddingVertical: 6 }}>

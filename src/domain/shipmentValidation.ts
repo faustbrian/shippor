@@ -70,6 +70,8 @@ export function createEmptyShipmentDraft(): ShipmentDraft {
     contents: '',
     reference: '',
     value: '',
+    currency: 'EUR',
+    incoterms: 'DAP',
     instructions: '',
     instructionsPickUp: '',
     returnFreightDoc: false,

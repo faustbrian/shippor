@@ -74,6 +74,8 @@ export interface ShipmentDraft {
   contents: string;
   reference: string;
   value: string;
+  currency: string;
+  incoterms: string;
   instructions?: string;
   instructionsPickUp?: string;
   returnFreightDoc: boolean;
