@@ -278,6 +278,32 @@ export async function searchAddressBook(query: string): Promise<Address[]> {
   );
 }
 
+function removeSpaces(value: string): string {
+  return value.replace(/\s+/g, '');
+}
+
+export async function fetchAddressSuggestions(search: string, country: string): Promise<Address[]> {
+  const normalized = search.trim().toLowerCase();
+  if (!normalized) {
+    return delay([]);
+  }
+
+  const suggestions = addressBook
+    .filter((entry) => !country || entry.country === country)
+    .filter((entry) => {
+      return (
+        entry.postalCode.toLowerCase().includes(normalized) ||
+        removeSpaces(entry.postalCode.toLowerCase()).includes(removeSpaces(normalized)) ||
+        entry.street.toLowerCase().includes(normalized) ||
+        entry.city.toLowerCase().includes(normalized) ||
+        entry.name.toLowerCase().includes(normalized)
+      );
+    })
+    .sort((a, b) => a.postalCode.localeCompare(b.postalCode));
+
+  return delay(suggestions);
+}
+
 export async function fetchShippingMethods(_draft: ShipmentDraft): Promise<ShippingMethod[]> {
   return delay(shippingMethods);
 }

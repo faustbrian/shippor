@@ -12,6 +12,7 @@ import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import type { Address } from '../../types/models';
 import { filterAddressesByWordMatch, removeSpacesWhenFiltering } from '../../utils/addressSearch';
+import { fetchAddressSuggestions } from '../../api/mockApi';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendBasic'>;
 
@@ -51,7 +52,47 @@ export function SendBasicScreen({ navigation }: Props) {
   const searchAddressBook = useAppStore((state) => state.searchAddressBook);
 
   const [query, setQuery] = useState('');
+  const [senderQuickSearch, setSenderQuickSearch] = useState('');
+  const [recipientQuickSearch, setRecipientQuickSearch] = useState('');
+  const [senderSuggestions, setSenderSuggestions] = useState<Address[]>([]);
+  const [recipientSuggestions, setRecipientSuggestions] = useState<Address[]>([]);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepBasic> | null>(null);
+
+  const normalize = (value: string) => value.replace(/\s+/g, '');
+
+  const runQuickSearch = async (role: 'sender' | 'recipient', typedValue: string) => {
+    const country = role === 'sender' ? draft.senderAddress.country : draft.recipientAddress.country;
+    const suggestions = await fetchAddressSuggestions(typedValue, country);
+
+    if (suggestions.length === 1) {
+      replaceDraftAddress(role, suggestions[0]);
+      if (role === 'sender') {
+        setSenderSuggestions([]);
+      } else {
+        setRecipientSuggestions([]);
+      }
+      return;
+    }
+
+    if (
+      suggestions.length > 1 &&
+      normalize(suggestions[0].postalCode.toLowerCase()) === normalize(typedValue.toLowerCase())
+    ) {
+      replaceDraftAddress(role, suggestions[0]);
+      if (role === 'sender') {
+        setSenderSuggestions([]);
+      } else {
+        setRecipientSuggestions([]);
+      }
+      return;
+    }
+
+    if (role === 'sender') {
+      setSenderSuggestions(suggestions);
+    } else {
+      setRecipientSuggestions(suggestions);
+    }
+  };
 
   const updateParcel = (
     parcelId: string,
@@ -175,6 +216,26 @@ export function SendBasicScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Sender</Text>
+          <Label>Quick search (postal / street / city)</Label>
+          <FieldInput
+            placeholder="Type sender postcode or address"
+            value={senderQuickSearch}
+            onChangeText={(value) => {
+              setSenderQuickSearch(value);
+              void runQuickSearch('sender', value);
+            }}
+          />
+          {senderSuggestions.map((entry) => (
+            <SecondaryButton
+              key={`sender-suggest-${entry.id}`}
+              label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
+              onPress={() => {
+                replaceDraftAddress('sender', entry);
+                setSenderSuggestions([]);
+                setSenderQuickSearch(entry.postalCode);
+              }}
+            />
+          ))}
           <View style={ui.row}>
             <PrimaryButton label="Private" onPress={() => updateAddressField('sender', 'type', 'private')} />
             <PrimaryButton label="Business" onPress={() => updateAddressField('sender', 'type', 'business')} />
@@ -185,6 +246,26 @@ export function SendBasicScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Recipient</Text>
+          <Label>Quick search (postal / street / city)</Label>
+          <FieldInput
+            placeholder="Type recipient postcode or address"
+            value={recipientQuickSearch}
+            onChangeText={(value) => {
+              setRecipientQuickSearch(value);
+              void runQuickSearch('recipient', value);
+            }}
+          />
+          {recipientSuggestions.map((entry) => (
+            <SecondaryButton
+              key={`recipient-suggest-${entry.id}`}
+              label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
+              onPress={() => {
+                replaceDraftAddress('recipient', entry);
+                setRecipientSuggestions([]);
+                setRecipientQuickSearch(entry.postalCode);
+              }}
+            />
+          ))}
           <View style={ui.row}>
             <PrimaryButton label="Private" onPress={() => updateAddressField('recipient', 'type', 'private')} />
             <PrimaryButton label="Business" onPress={() => updateAddressField('recipient', 'type', 'business')} />
