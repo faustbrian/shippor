@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard, ui } from '../../components/ui';
@@ -14,28 +14,50 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
   const draft = useAppStore((state) => state.currentDraft);
   const setDraft = useAppStore((state) => state.setDraft);
   const updateDraftField = useAppStore((state) => state.updateDraftField);
-  const upsertItem = useAppStore((state) => state.upsertItem);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
 
-  const firstItem = useMemo(() => {
-    return (
-      draft.items[0] ?? {
-        id: 'item-1',
-        description: '',
-        countryOfOrigin: 'US',
-        hsTariffCode: '',
-        quantity: null,
-        quantityUnit: null,
-        weight: null,
-        value: null,
-      }
-    );
-  }, [draft.items]);
+  const updateItem = (
+    index: number,
+    field: 'description' | 'countryOfOrigin' | 'hsTariffCode' | 'quantity' | 'quantityUnit' | 'weight' | 'value',
+    value: string | number | null,
+  ) => {
+    setDraft({
+      ...draft,
+      items: draft.items.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    });
+  };
+
+  const addBlankItem = () => {
+    const index = draft.items.length;
+    setDraft({
+      ...draft,
+      items: [
+        ...draft.items,
+        {
+          id: `item-${index + 1}`,
+          description: '',
+          countryOfOrigin: 'US',
+          hsTariffCode: '',
+          quantity: null,
+          quantityUnit: 'pcs',
+          weight: null,
+          value: null,
+        },
+      ],
+    });
+  };
+
+  const removeItem = (index: number) => {
+    setDraft({
+      ...draft,
+      items: draft.items.filter((_, i) => i !== index),
+    });
+  };
 
   const toggleProforma = (value: boolean) => {
     updateDraftField('createCommerceProformaInvoice', value);
     if (value && !draft.items.length) {
-      upsertItem(0, firstItem);
+      addBlankItem();
     }
   };
 
@@ -50,16 +72,22 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
   };
 
   const addQuickItem = () => {
-    const index = draft.items.length;
-    upsertItem(index, {
-      id: `item-${index + 1}`,
-      description: 'T-shirt',
-      countryOfOrigin: 'US',
-      hsTariffCode: '6109',
-      quantity: 1,
-      quantityUnit: 'pcs',
-      weight: 0.3,
-      value: 20,
+    const index = draft.items.length + 1;
+    setDraft({
+      ...draft,
+      items: [
+        ...draft.items,
+        {
+          id: `item-${index}`,
+          description: 'T-shirt',
+          countryOfOrigin: 'US',
+          hsTariffCode: '6109',
+          quantity: 1,
+          quantityUnit: 'pcs',
+          weight: 0.3,
+          value: 20,
+        },
+      ],
     });
   };
 
@@ -101,33 +129,48 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
 
           {draft.createCommerceProformaInvoice ? (
             <View style={{ gap: 6 }}>
+              <PrimaryButton label="Add empty item row" onPress={addBlankItem} />
               <PrimaryButton label="Quick add item" onPress={addQuickItem} />
-              <Label>Item description</Label>
-              <FieldInput value={firstItem.description} onChangeText={(v) => upsertItem(0, { ...firstItem, description: v })} />
-              <Label>Quantity</Label>
-              <FieldInput
-                value={firstItem.quantity ? String(firstItem.quantity) : ''}
-                keyboardType="numeric"
-                onChangeText={(v) => upsertItem(0, { ...firstItem, quantity: v ? Number(v) : null })}
-              />
-              <Label>Weight</Label>
-              <FieldInput
-                value={firstItem.weight ? String(firstItem.weight) : ''}
-                keyboardType="numeric"
-                onChangeText={(v) => upsertItem(0, { ...firstItem, weight: v ? Number(v) : null })}
-              />
-              <Label>Value</Label>
-              <FieldInput
-                value={firstItem.value ? String(firstItem.value) : ''}
-                keyboardType="numeric"
-                onChangeText={(v) => upsertItem(0, { ...firstItem, value: v ? Number(v) : null })}
-              />
-              <ErrorText text={errors?.items?.[firstItem.id] || errors?.items?.shipmentItems} />
-              {draft.items.length > 1 ? (
-                <Text style={{ color: '#667085' }}>
-                  Additional items in draft: {draft.items.length - 1} (quick-added)
-                </Text>
-              ) : null}
+              {draft.items.map((item, index) => (
+                <View key={item.id} style={{ borderWidth: 1, borderColor: '#EAECF0', borderRadius: 10, padding: 10, gap: 6 }}>
+                  <Text style={{ fontWeight: '700' }}>Item #{index + 1}</Text>
+                  <Label>Description</Label>
+                  <FieldInput value={item.description} onChangeText={(v) => updateItem(index, 'description', v)} />
+                  <Label>Country of origin</Label>
+                  <FieldInput value={item.countryOfOrigin} onChangeText={(v) => updateItem(index, 'countryOfOrigin', v)} autoCapitalize="characters" />
+                  <Label>HS tariff code</Label>
+                  <FieldInput value={item.hsTariffCode} onChangeText={(v) => updateItem(index, 'hsTariffCode', v)} />
+                  <Label>Quantity</Label>
+                  <FieldInput
+                    value={item.quantity ? String(item.quantity) : ''}
+                    keyboardType="numeric"
+                    onChangeText={(v) => updateItem(index, 'quantity', v ? Number(v) : null)}
+                  />
+                  <Label>Quantity unit</Label>
+                  <FieldInput value={item.quantityUnit ?? ''} onChangeText={(v) => updateItem(index, 'quantityUnit', v)} />
+                  <Label>Weight</Label>
+                  <FieldInput
+                    value={item.weight ? String(item.weight) : ''}
+                    keyboardType="numeric"
+                    onChangeText={(v) => updateItem(index, 'weight', v ? Number(v) : null)}
+                  />
+                  <Label>Value</Label>
+                  <FieldInput
+                    value={item.value ? String(item.value) : ''}
+                    keyboardType="numeric"
+                    onChangeText={(v) => updateItem(index, 'value', v ? Number(v) : null)}
+                  />
+                  <ErrorText text={errors?.items?.[item.id]} />
+                  <PrimaryButton label="Remove item" onPress={() => removeItem(index)} />
+                </View>
+              ))}
+              <ErrorText text={errors?.items?.shipmentItems} />
+              <Text style={{ color: '#667085' }}>
+                Items total value: {draft.items.reduce((sum, item) => sum + (item.value ?? 0), 0).toFixed(2)}
+              </Text>
+              <Text style={{ color: '#667085' }}>
+                Items total weight: {draft.items.reduce((sum, item) => sum + (item.weight ?? 0), 0).toFixed(2)} kg
+              </Text>
             </View>
           ) : null}
         </SectionCard>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard, ui } from '../../components/ui';
+import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SecondaryButton, SectionCard, ui } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { RecentShipmentsPanel } from '../../components/RecentShipmentsPanel';
 import { QuickAddParcelsCard } from '../../components/QuickAddParcelsCard';
@@ -48,12 +48,51 @@ export function SendBasicScreen({ navigation }: Props) {
   const addressBook = useAppStore((state) => state.addressBook);
   const replaceDraftAddress = useAppStore((state) => state.replaceDraftAddress);
   const updateAddressField = useAppStore((state) => state.updateAddressField);
-  const updateParcelField = useAppStore((state) => state.updateParcelField);
   const searchAddressBook = useAppStore((state) => state.searchAddressBook);
 
   const [query, setQuery] = useState('');
   const [errors, setErrors] = useState<ReturnType<typeof validateStepBasic> | null>(null);
-  const parcel = draft.parcels[0];
+
+  const updateParcel = (
+    parcelId: string,
+    field: 'weight' | 'width' | 'height' | 'length' | 'copies',
+    value: number | null,
+  ) => {
+    setDraft({
+      ...draft,
+      parcels: draft.parcels.map((parcel) =>
+        parcel.id === parcelId ? { ...parcel, [field]: value } : parcel,
+      ),
+    });
+  };
+
+  const addParcel = () => {
+    const nextId = `parcel-${draft.parcels.length + 1}`;
+    setDraft({
+      ...draft,
+      parcels: [
+        ...draft.parcels,
+        {
+          id: nextId,
+          width: null,
+          height: null,
+          length: null,
+          weight: null,
+          copies: 1,
+        },
+      ],
+    });
+  };
+
+  const removeParcel = (id: string) => {
+    if (draft.parcels.length === 1) {
+      return;
+    }
+    setDraft({
+      ...draft,
+      parcels: draft.parcels.filter((parcel) => parcel.id !== id),
+    });
+  };
 
   const filtered = useMemo(() => {
     if (!query.trim()) {
@@ -149,31 +188,44 @@ export function SendBasicScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Parcel</Text>
-          <Label>Weight (kg)</Label>
-          <FieldInput
-            keyboardType="numeric"
-            value={parcel.weight ? String(parcel.weight) : ''}
-            onChangeText={(value) => updateParcelField(parcel.id, 'weight', value ? Number(value) : null)}
-          />
-          <Label>Width (cm)</Label>
-          <FieldInput
-            keyboardType="numeric"
-            value={parcel.width ? String(parcel.width) : ''}
-            onChangeText={(value) => updateParcelField(parcel.id, 'width', value ? Number(value) : null)}
-          />
-          <Label>Height (cm)</Label>
-          <FieldInput
-            keyboardType="numeric"
-            value={parcel.height ? String(parcel.height) : ''}
-            onChangeText={(value) => updateParcelField(parcel.id, 'height', value ? Number(value) : null)}
-          />
-          <Label>Length (cm)</Label>
-          <FieldInput
-            keyboardType="numeric"
-            value={parcel.length ? String(parcel.length) : ''}
-            onChangeText={(value) => updateParcelField(parcel.id, 'length', value ? Number(value) : null)}
-          />
-          <ErrorText text={errors?.parcels[parcel.id]} />
+          {draft.parcels.map((parcel, index) => (
+            <View key={parcel.id} style={{ borderWidth: 1, borderColor: '#EAECF0', borderRadius: 10, padding: 10, gap: 6 }}>
+              <Text style={{ fontWeight: '700' }}>Parcel #{index + 1}</Text>
+              <Label>Weight (kg)</Label>
+              <FieldInput
+                keyboardType="numeric"
+                value={parcel.weight ? String(parcel.weight) : ''}
+                onChangeText={(value) => updateParcel(parcel.id, 'weight', value ? Number(value) : null)}
+              />
+              <Label>Width (cm)</Label>
+              <FieldInput
+                keyboardType="numeric"
+                value={parcel.width ? String(parcel.width) : ''}
+                onChangeText={(value) => updateParcel(parcel.id, 'width', value ? Number(value) : null)}
+              />
+              <Label>Height (cm)</Label>
+              <FieldInput
+                keyboardType="numeric"
+                value={parcel.height ? String(parcel.height) : ''}
+                onChangeText={(value) => updateParcel(parcel.id, 'height', value ? Number(value) : null)}
+              />
+              <Label>Length (cm)</Label>
+              <FieldInput
+                keyboardType="numeric"
+                value={parcel.length ? String(parcel.length) : ''}
+                onChangeText={(value) => updateParcel(parcel.id, 'length', value ? Number(value) : null)}
+              />
+              <Label>Copies</Label>
+              <FieldInput
+                keyboardType="numeric"
+                value={parcel.copies ? String(parcel.copies) : ''}
+                onChangeText={(value) => updateParcel(parcel.id, 'copies', value ? Number(value) : null)}
+              />
+              <ErrorText text={errors?.parcels[parcel.id]} />
+              <SecondaryButton label="Remove parcel" onPress={() => removeParcel(parcel.id)} />
+            </View>
+          ))}
+          <PrimaryButton label="Add parcel" onPress={addParcel} />
         </SectionCard>
         <QuickAddParcelsCard draft={draft} onApply={setDraft} />
 
