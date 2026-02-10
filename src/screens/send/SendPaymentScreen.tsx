@@ -19,6 +19,7 @@ const paymentOptions = [
 
 export function SendPaymentScreen({ navigation }: Props) {
   const cart = useAppStore((state) => state.cart);
+  const cartItemErrors = useAppStore((state) => state.cartItemErrors);
   const selectedPaymentMethod = useAppStore((state) => state.selectedPaymentMethod);
   const agreeToTerms = useAppStore((state) => state.agreeToTerms);
   const checkoutError = useAppStore((state) => state.checkoutError);
@@ -80,6 +81,11 @@ export function SendPaymentScreen({ navigation }: Props) {
           <Text>{selectedPaymentMethod ? 'Ready for payment' : 'Select method to continue'}</Text>
           <Text>{agreeToTerms ? 'Terms accepted' : 'Terms not accepted'}</Text>
           <Text>Flow state: {checkoutFlowState}</Text>
+          {Object.values(cartItemErrors).some(Boolean) ? (
+            <Text style={{ color: '#D92D20' }}>
+              Failed cart items detected. Update failed items or retry non-failing items.
+            </Text>
+          ) : null}
         </SectionCard>
 
         <SectionCard>

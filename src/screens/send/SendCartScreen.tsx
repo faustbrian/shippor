@@ -13,6 +13,7 @@ type Props = NativeStackScreenProps<SendStackParamList, 'SendCart'>;
 export function SendCartScreen({ navigation }: Props) {
   const draft = useAppStore((state) => state.currentDraft);
   const cart = useAppStore((state) => state.cart);
+  const cartItemErrors = useAppStore((state) => state.cartItemErrors);
   const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
   const selectedPaymentMethod = useAppStore((state) => state.selectedPaymentMethod);
   const agreeToTerms = useAppStore((state) => state.agreeToTerms);
@@ -50,6 +51,9 @@ export function SendCartScreen({ navigation }: Props) {
                 <Text style={{ fontWeight: '700' }}>{item.title}</Text>
                 <Text>{item.draft.selectedMethod?.label}</Text>
                 <Text>${item.price.toFixed(2)}</Text>
+                {cartItemErrors[item.id] ? (
+                  <Text style={{ color: '#D92D20' }}>{cartItemErrors[item.id]}</Text>
+                ) : null}
                 <SecondaryButton label="Remove" onPress={() => removeCartItem(item.id)} />
               </View>
             ))

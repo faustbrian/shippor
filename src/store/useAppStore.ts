@@ -45,6 +45,7 @@ interface AppState {
   sortShippingMethodsState: SortShippingMethodsState;
   currentDraft: ShipmentDraft;
   cart: CartItem[];
+  cartItemErrors: Record<string, string>;
   selectedPaymentMethod: string;
   agreeToTerms: boolean;
   checkoutError: string | null;
@@ -107,6 +108,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   sortShippingMethodsState: 'deliveryTime',
   currentDraft: createNewDraft(),
   cart: [],
+  cartItemErrors: {},
   selectedPaymentMethod: '',
   agreeToTerms: false,
   checkoutError: null,
@@ -149,6 +151,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       shippingMethods: [],
       pickupLocations: [],
       cart: [],
+      cartItemErrors: {},
       selectedPaymentMethod: '',
       agreeToTerms: false,
       checkoutError: null,
@@ -296,6 +299,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     const item = draftToCartItem(draft);
     set((state) => ({
       cart: [...state.cart, item],
+      cartItemErrors: {
+        ...state.cartItemErrors,
+        [item.id]: '',
+      },
       currentDraft: createNewDraft(),
       shippingMethods: [],
       pickupLocations: [],
@@ -305,6 +312,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   removeCartItem(id) {
     set((state) => ({
       cart: state.cart.filter((item) => item.id !== id),
+      cartItemErrors: Object.fromEntries(
+        Object.entries(state.cartItemErrors).filter(([key]) => key !== id),
+      ),
     }));
   },
 
@@ -336,8 +346,28 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     set({ isBusy: true, checkoutError: null, checkoutFlowState: 'pending' });
     const created: ShipmentRecord[] = [];
+    const failedItems: CartItem[] = [];
+    const nextItemErrors: Record<string, string> = {};
     for (const item of cart) {
+      // Stubbed shipment-controller partial failures for parity testing.
+      if (item.draft.addons.dangerous) {
+        failedItems.push(item);
+        nextItemErrors[item.id] = 'Dangerous goods shipment failed. Review details and retry.';
+        continue;
+      }
+
       created.push(await createShipmentFromDraft(item.draft));
+    }
+
+    if (!created.length && failedItems.length) {
+      set({
+        isBusy: false,
+        cart: failedItems,
+        cartItemErrors: nextItemErrors,
+        checkoutFlowState: 'failed-payment',
+        checkoutError: 'All shipments failed. Fix failed items and retry.',
+      });
+      return false;
     }
 
     set({ checkoutFlowState: 'paid' });
@@ -350,7 +380,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     set({
       isBusy: false,
-      cart: [],
+      cart: failedItems,
+      cartItemErrors: nextItemErrors,
       selectedPaymentMethod: '',
       agreeToTerms: false,
       shipments: nextShipments,
@@ -361,9 +392,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       currentDraft: createNewDraft(),
       shippingMethods: [],
       pickupLocations: [],
-      checkoutFlowState: 'shipped',
+      checkoutFlowState: failedItems.length ? 'failed-payment' : 'shipped',
+      checkoutError: failedItems.length
+        ? `${failedItems.length} shipment(s) failed. Successful shipments were created.`
+        : null,
     });
-    return true;
+    return failedItems.length === 0;
   },
 
   async searchAddressBook(query) {
