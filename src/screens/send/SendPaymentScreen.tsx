@@ -1,6 +1,6 @@
-import { ScrollView, Switch, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppScreen, ErrorText, Heading, Label, PrimaryButton, SectionCard } from '../../components/ui';
+import { AppScreen, ErrorText, Heading, PrimaryButton, SectionCard } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { PaymentMethodCard } from '../../components/PaymentMethodCard';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
@@ -8,6 +8,8 @@ import { useAppStore, useCartTotals } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { PaymentStateBanner } from '../../components/PaymentStateBanner';
 import { CartSidePanelMobile } from '../../components/CartSidePanelMobile';
+import { PaymentSelectionFieldset } from '../../components/PaymentSelectionFieldset';
+import { AgreeToTermsFieldset } from '../../components/AgreeToTermsFieldset';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendPayment'>;
 
@@ -57,8 +59,7 @@ export function SendPaymentScreen({ navigation }: Props) {
           }}
         />
 
-        <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Payment method</Text>
+        <PaymentSelectionFieldset>
           <View style={{ gap: 8 }}>
             {paymentOptions.map((option) => (
               <PaymentMethodCard
@@ -70,21 +71,15 @@ export function SendPaymentScreen({ navigation }: Props) {
               />
             ))}
           </View>
-          <Text style={{ color: '#667085' }}>
+          <Text style={{ color: '#667085', fontSize: 12 }}>
             API payment gateways are stubbed. This screen mirrors cart payment
             selection flow.
           </Text>
-        </SectionCard>
+        </PaymentSelectionFieldset>
 
+        <AgreeToTermsFieldset value={agreeToTerms} onValueChange={setAgreeToTerms} />
         <SectionCard>
-          <Label>Agree to terms</Label>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>I have reviewed shipping terms and payment details.</Text>
-            <Switch value={agreeToTerms} onValueChange={setAgreeToTerms} />
-          </View>
-        </SectionCard>
-        <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Payment status</Text>
+          <Text style={{ fontWeight: '800' }}>Payment and shipment status</Text>
           <Text>{selectedPaymentMethod ? 'Ready for payment' : 'Select method to continue'}</Text>
           <Text>{agreeToTerms ? 'Terms accepted' : 'Terms not accepted'}</Text>
           <Text>Flow state: {checkoutFlowState}</Text>
@@ -102,7 +97,7 @@ export function SendPaymentScreen({ navigation }: Props) {
         </SectionCard>
 
         <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Checkout totals</Text>
+          <Text style={{ fontWeight: '800' }}>Checkout totals</Text>
           <Text>Items: {cart.length}</Text>
           <Text>Subtotal: ${totals.subtotal.toFixed(2)}</Text>
           <Text>Fee: ${totals.fee.toFixed(2)}</Text>

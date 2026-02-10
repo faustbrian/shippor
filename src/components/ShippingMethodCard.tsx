@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { ShippingMethod } from '../types/models';
-import { palette, PrimaryButton, SectionCard } from './ui';
+import { palette, PrimaryButton } from './ui';
 
 function Tag({ text }: { text: string }) {
   return (
@@ -27,17 +27,18 @@ export function ShippingMethodCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const tags = method.tags ?? [];
+  const borderColor = selected ? '#039855' : expanded ? '#0A66FF' : '#D0D5DD';
 
   return (
-    <SectionCard>
+    <View style={{ borderWidth: 1, borderColor, borderRadius: 12, backgroundColor: '#fff', padding: 12, marginBottom: 10 }}>
       <Pressable onPress={onSelect} style={{ gap: 8 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: '800', fontSize: 16 }}>
+            <Text style={{ fontWeight: '800', fontSize: 16, color: '#101828' }}>
               {method.logo ? `${method.logo} ` : ''}
               {method.label}
             </Text>
-            <Text style={{ color: '#667085' }}>{method.carrier}</Text>
+            <Text style={{ color: '#667085', fontSize: 12 }}>{method.carrier}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={{ fontWeight: '800', fontSize: 18 }}>${method.price.toFixed(2)}</Text>
@@ -71,7 +72,7 @@ export function ShippingMethodCard({
       </Pressable>
 
       {expanded ? (
-        <View style={{ borderTopWidth: 1, borderTopColor: '#EAECF0', paddingTop: 10, gap: 8 }}>
+        <View style={{ borderTopWidth: 1, borderTopColor: '#EAECF0', paddingTop: 10, marginTop: 10, gap: 8 }}>
           <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
             <Ionicons name="time-outline" size={16} color="#344054" />
             <Text>Estimated delivery: {method.deliveryTime} days</Text>
@@ -83,9 +84,14 @@ export function ShippingMethodCard({
           {method.infoText?.map((text) => (
             <Text key={text} style={{ color: '#475467' }}>{text}</Text>
           ))}
-          <PrimaryButton label="Confirm and continue" onPress={onConfirm} />
+          <View style={{ gap: 8 }}>
+            <PrimaryButton label="Confirm and continue" onPress={onConfirm} />
+            <Pressable onPress={() => setExpanded(false)} style={{ alignItems: 'center', paddingVertical: 6 }}>
+              <Text style={{ color: '#475467', fontWeight: '700' }}>Close</Text>
+            </Pressable>
+          </View>
         </View>
       ) : null}
-    </SectionCard>
+    </View>
   );
 }

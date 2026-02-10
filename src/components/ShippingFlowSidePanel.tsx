@@ -1,5 +1,5 @@
 import type { ShipmentDraft } from '../types/models';
-import { SectionCard } from './ui';
+import { View } from 'react-native';
 import { AddressesSummary } from './AddressesSummary';
 import { ParcelSummary } from './ParcelSummary';
 import { ShipmentSummary } from './ShipmentSummary';
@@ -7,11 +7,11 @@ import { ShippingMethodAndPriceSummary } from './ShippingMethodAndPriceSummary';
 
 export function ShippingFlowSidePanel({ draft }: { draft: ShipmentDraft }) {
   return (
-    <SectionCard>
+    <View style={{ gap: 10 }}>
       <AddressesSummary draft={draft} />
       <ParcelSummary draft={draft} />
       <ShipmentSummary draft={draft} />
       <ShippingMethodAndPriceSummary draft={draft} />
-    </SectionCard>
+    </View>
   );
 }
