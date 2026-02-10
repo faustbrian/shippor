@@ -44,3 +44,8 @@ This file captures the original requested feature scope for the Shippor Expo app
 - Prioritize UI and flow parity first.
 - Defer tests early until UI/flow is fully validated.
 - Ensure as-close-as-possible parity so customers can switch between web and mobile with the same expected fields/order/flow.
+
+## Out of Scope for MVP (Current)
+- Full backend production integration (live services) while API stubs are in use.
+- Complete parity-certified test suite (unit/integration/E2E) before UI parity sign-off.
+- Final performance hardening and release pipeline polish before core parity and functionality are complete.
