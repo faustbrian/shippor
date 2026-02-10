@@ -8,6 +8,7 @@ import { validateStepAddressDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { showAddressLine2Field, showPostalCodeField, showStateField } from '../../utils/addressRules';
+import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendAddressDetails'>;
 
@@ -102,6 +103,8 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
               <Label>VAT number</Label>
               <FieldInput value={draft.senderAddress.vatNumber ?? ''} onChangeText={(v) => updateAddressField('sender', 'vatNumber', v)} />
               <ErrorText text={errors?.senderAddress?.vatNumber} />
+              <Label>VAT Tax ID type</Label>
+              <FieldInput value={draft.senderAddress.vatTaxIdType ?? ''} onChangeText={(v) => updateAddressField('sender', 'vatTaxIdType', v)} placeholder="VAT / EORI / OSS / IOSS" />
             </>
           ) : null}
           {draft.senderAddress.type === 'business' ? (
@@ -180,6 +183,8 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
               <Label>VAT number</Label>
               <FieldInput value={draft.recipientAddress.vatNumber ?? ''} onChangeText={(v) => updateAddressField('recipient', 'vatNumber', v)} />
               <ErrorText text={errors?.recipientAddress?.vatNumber} />
+              <Label>VAT Tax ID type</Label>
+              <FieldInput value={draft.recipientAddress.vatTaxIdType ?? ''} onChangeText={(v) => updateAddressField('recipient', 'vatTaxIdType', v)} placeholder="VAT / EORI / OSS / IOSS" />
             </>
           ) : null}
           {draft.recipientAddress.type === 'business' ? (
@@ -218,8 +223,33 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
             />
           </View>
         </SectionCard>
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Paying party and paying address</Text>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <PrimaryButton label="Sender pays" onPress={() => setDraft({ ...draft, payingParty: 'sender', payingAddress: { ...draft.senderAddress } })} />
+            <PrimaryButton label="Recipient pays" onPress={() => setDraft({ ...draft, payingParty: 'recipient', payingAddress: { ...draft.recipientAddress } })} />
+            <PrimaryButton label="Third-party pays" onPress={() => setDraft({ ...draft, payingParty: 'third-party' })} />
+          </View>
+          <Text style={{ color: '#475467' }}>Current payer: {draft.payingParty}</Text>
+          {draft.payingParty === 'third-party' ? (
+            <View style={{ gap: 6 }}>
+              <Label>Third-party name</Label>
+              <FieldInput value={draft.payingAddress.name} onChangeText={(v) => setDraft({ ...draft, payingAddress: { ...draft.payingAddress, name: v } })} />
+              <Label>Third-party street</Label>
+              <FieldInput value={draft.payingAddress.street} onChangeText={(v) => setDraft({ ...draft, payingAddress: { ...draft.payingAddress, street: v } })} />
+              <Label>Third-party city</Label>
+              <FieldInput value={draft.payingAddress.city} onChangeText={(v) => setDraft({ ...draft, payingAddress: { ...draft.payingAddress, city: v } })} />
+              <Label>Third-party country</Label>
+              <FieldInput value={draft.payingAddress.country} onChangeText={(v) => setDraft({ ...draft, payingAddress: { ...draft.payingAddress, country: v } })} />
+            </View>
+          ) : null}
+        </SectionCard>
 
-        <PrimaryButton label="Next: Shipment details" onPress={next} />
+        <SubmitAndBackButtons
+          continueLabel="Next: Shipment details"
+          onContinue={next}
+          onBack={() => navigation.goBack()}
+        />
         <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppScreen, ErrorText, Heading, Label, PrimaryButton, SectionCard } from '../../components/ui';
+import { AppScreen, ErrorText, Heading, Label, SectionCard } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { filterShippingMethodsByType, getShippingMethodValidationErrors } from '../../domain/shippingMethods';
 import { useAppStore } from '../../store/useAppStore';
@@ -11,6 +11,7 @@ import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { ShippingMethodInstructionsPanel } from '../../components/ShippingMethodInstructionsPanel';
 import { Switch } from 'react-native';
 import { ShippingMethodsLoadingPlaceholder } from '../../components/ShippingMethodsLoadingPlaceholder';
+import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendMethods'>;
 
@@ -288,9 +289,9 @@ export function SendMethodsScreen({ navigation }: Props) {
           </SectionCard>
         ) : null}
 
-        <PrimaryButton
-          label="Next: Cart"
-          onPress={() => {
+        <SubmitAndBackButtons
+          continueLabel="Next: Cart"
+          onContinue={() => {
             const errors = getShippingMethodValidationErrors(draft.selectedMethod);
             setShippingMethodError(errors.shippingMethod);
             if (draft.selectedMethod?.isPickupLocationMethod && !draft.pickupLocationId) {
@@ -301,6 +302,7 @@ export function SendMethodsScreen({ navigation }: Props) {
               navigation.navigate('SendCart');
             }
           }}
+          onBack={() => navigation.navigate('SendShipmentDetails')}
         />
         <ShippingFlowSidePanel draft={draft} />
       </ScrollView>

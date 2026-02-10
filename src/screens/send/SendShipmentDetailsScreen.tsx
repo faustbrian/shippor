@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { ScrollView, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard, ui } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
@@ -7,6 +7,7 @@ import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { validateStepShipmentDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
+import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendShipmentDetails'>;
 
@@ -15,6 +16,8 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
   const setDraft = useAppStore((state) => state.setDraft);
   const updateDraftField = useAppStore((state) => state.updateDraftField);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
+  const isPrivateSender = draft.senderAddress.type === 'private';
+  const isSweden = draft.senderAddress.country === 'SE' || draft.recipientAddress.country === 'SE';
 
   const updateItem = (
     index: number,
@@ -125,6 +128,10 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
             <Text style={{ fontWeight: '700', flex: 1 }}>Create proforma invoice</Text>
             <Switch value={Boolean(draft.createCommerceProformaInvoice)} onValueChange={toggleProforma} />
           </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <PrimaryButton label="Simple mode" onPress={() => setDraft({ ...draft, commerceInvoiceMode: 'simple' })} />
+            <PrimaryButton label="Power mode" onPress={() => setDraft({ ...draft, commerceInvoiceMode: 'power' })} />
+          </View>
           <ErrorText text={errors?.createCommerceProformaInvoice} />
 
           {draft.createCommerceProformaInvoice ? (
@@ -171,6 +178,31 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
               <Text style={{ color: '#667085' }}>
                 Items total weight: {draft.items.reduce((sum, item) => sum + (item.weight ?? 0), 0).toFixed(2)} kg
               </Text>
+              {draft.commerceInvoiceMode === 'power' ? (
+                <View style={{ gap: 6, borderWidth: 1, borderColor: '#EAECF0', borderRadius: 10, padding: 10 }}>
+                  <Text style={{ fontWeight: '700' }}>Commercial invoice power mode</Text>
+                  <Label>Invoice number</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.invoiceNumber}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, invoiceNumber: value } })}
+                  />
+                  <Label>Export reason</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.exportReason}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, exportReason: value } })}
+                  />
+                  <Label>Incoterm</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.incoterm}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, incoterm: value } })}
+                  />
+                  <Label>Importer reference</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.importerReference}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, importerReference: value } })}
+                  />
+                </View>
+              ) : null}
             </View>
           ) : null}
         </SectionCard>
@@ -234,15 +266,17 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
               }
             />
           </View>
-          <View style={ui.row}>
-            <Text style={{ flex: 1 }}>Limited quantities</Text>
-            <Switch
-              value={Boolean(draft.addons.limitedQtys)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, limitedQtys: value } })
-              }
-            />
-          </View>
+          {!isPrivateSender && !isSweden ? (
+            <View style={ui.row}>
+              <Text style={{ flex: 1 }}>Limited quantities</Text>
+              <Switch
+                value={Boolean(draft.addons.limitedQtys)}
+                onValueChange={(value) =>
+                  setDraft({ ...draft, addons: { ...draft.addons, limitedQtys: value } })
+                }
+              />
+            </View>
+          ) : null}
           <View style={ui.row}>
             <Text style={{ flex: 1 }}>Fragile</Text>
             <Switch
@@ -252,15 +286,17 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
               }
             />
           </View>
-          <View style={ui.row}>
-            <Text style={{ flex: 1 }}>Dangerous goods</Text>
-            <Switch
-              value={Boolean(draft.addons.dangerous)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } })
-              }
-            />
-          </View>
+          {!isPrivateSender && !isSweden ? (
+            <View style={ui.row}>
+              <Text style={{ flex: 1 }}>Dangerous goods</Text>
+              <Switch
+                value={Boolean(draft.addons.dangerous)}
+                onValueChange={(value) =>
+                  setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } })
+                }
+              />
+            </View>
+          ) : null}
           <View style={ui.row}>
             <Text style={{ flex: 1 }}>Proof of delivery</Text>
             <Switch
@@ -280,11 +316,21 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
             />
           </View>
         </SectionCard>
+        {draft.addons.dangerous ? (
+          <SectionCard>
+            <Text style={{ fontWeight: '700' }}>Dangerous goods section</Text>
+            <Label>UN Number</Label>
+            <FieldInput value={draft.dangerousGoods.unNumber} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, unNumber: value } })} />
+            <Label>Hazard class</Label>
+            <FieldInput value={draft.dangerousGoods.hazardClass} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, hazardClass: value } })} />
+            <Label>Packing group</Label>
+            <FieldInput value={draft.dangerousGoods.packingGroup} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, packingGroup: value } })} />
+            <Label>Emergency contact</Label>
+            <FieldInput value={draft.dangerousGoods.emergencyContact} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, emergencyContact: value } })} />
+          </SectionCard>
+        ) : null}
 
-        <Pressable onPress={() => navigation.goBack()}>
-          <Text>Back</Text>
-        </Pressable>
-        <PrimaryButton label="Next: Methods" onPress={next} />
+        <SubmitAndBackButtons continueLabel="Next: Methods" onContinue={next} onBack={() => navigation.goBack()} />
         <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>

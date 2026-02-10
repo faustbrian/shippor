@@ -14,6 +14,8 @@ import type { Address } from '../../types/models';
 import { filterAddressesByWordMatch, removeSpacesWhenFiltering } from '../../utils/addressSearch';
 import { fetchAddressSuggestions } from '../../api/mockApi';
 import { getQuickSearchMapping, isSafeToChangeAddress, removeSpaces } from '../../utils/quickSearch';
+import { AddressQuickSearchPanel } from '../../components/AddressQuickSearchPanel';
+import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendBasic'>;
 
@@ -235,43 +237,31 @@ export function SendBasicScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Sender</Text>
-          {(() => {
-            const [mappedField, label] = getQuickSearchMapping(draft.senderAddress.country);
-            if (!mappedField) {
-              return null;
-            }
-
-            return (
-              <View style={{ gap: 6 }}>
-                <Label>Quick search ({label.toLowerCase()} / street / city)</Label>
-                <FieldInput
-                  placeholder={`Type sender ${label.toLowerCase()} or address`}
-                  value={senderQuickSearch}
-                  onChangeText={(value) => {
-                    setSenderQuickSearch(value);
-                    void runQuickSearch('sender', value);
-                  }}
-                />
-                {senderSuggestions.map((entry) => (
-                  <SecondaryButton
-                    key={`sender-suggest-${entry.id}`}
-                    label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
-                    onPress={() => {
-                      const safe = isSafeToChangeAddress(draft.senderAddress, entry, ['country']);
-                      if (!safe) {
-                        setQuickSearchWarning('Suggestion blocked because country mismatch is not allowed.');
-                        return;
-                      }
-                      replaceDraftAddress('sender', entry);
-                      setSenderSuggestions([]);
-                      setSenderQuickSearch(String(entry[mappedField]));
-                      setQuickSearchWarning('');
-                    }}
-                  />
-                ))}
-              </View>
-            );
-          })()}
+          <AddressQuickSearchPanel
+            title="Sender quick search panel"
+            value={senderQuickSearch}
+            placeholder="Type sender postal/street/city"
+            onChangeText={(value) => {
+              setSenderQuickSearch(value);
+              void runQuickSearch('sender', value);
+            }}
+            suggestions={senderSuggestions}
+            onSelectSuggestion={(entry) => {
+              const [mappedField] = getQuickSearchMapping(draft.senderAddress.country);
+              if (!mappedField) {
+                return;
+              }
+              const safe = isSafeToChangeAddress(draft.senderAddress, entry, ['country']);
+              if (!safe) {
+                setQuickSearchWarning('Suggestion blocked because country mismatch is not allowed.');
+                return;
+              }
+              replaceDraftAddress('sender', entry);
+              setSenderSuggestions([]);
+              setSenderQuickSearch(String(entry[mappedField]));
+              setQuickSearchWarning('');
+            }}
+          />
           <View style={ui.row}>
             <PrimaryButton label="Private" onPress={() => updateAddressField('sender', 'type', 'private')} />
             <PrimaryButton label="Business" onPress={() => updateAddressField('sender', 'type', 'business')} />
@@ -282,43 +272,31 @@ export function SendBasicScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Recipient</Text>
-          {(() => {
-            const [mappedField, label] = getQuickSearchMapping(draft.recipientAddress.country);
-            if (!mappedField) {
-              return null;
-            }
-
-            return (
-              <View style={{ gap: 6 }}>
-                <Label>Quick search ({label.toLowerCase()} / street / city)</Label>
-                <FieldInput
-                  placeholder={`Type recipient ${label.toLowerCase()} or address`}
-                  value={recipientQuickSearch}
-                  onChangeText={(value) => {
-                    setRecipientQuickSearch(value);
-                    void runQuickSearch('recipient', value);
-                  }}
-                />
-                {recipientSuggestions.map((entry) => (
-                  <SecondaryButton
-                    key={`recipient-suggest-${entry.id}`}
-                    label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
-                    onPress={() => {
-                      const safe = isSafeToChangeAddress(draft.recipientAddress, entry, ['country']);
-                      if (!safe) {
-                        setQuickSearchWarning('Suggestion blocked because country mismatch is not allowed.');
-                        return;
-                      }
-                      replaceDraftAddress('recipient', entry);
-                      setRecipientSuggestions([]);
-                      setRecipientQuickSearch(String(entry[mappedField]));
-                      setQuickSearchWarning('');
-                    }}
-                  />
-                ))}
-              </View>
-            );
-          })()}
+          <AddressQuickSearchPanel
+            title="Recipient quick search panel"
+            value={recipientQuickSearch}
+            placeholder="Type recipient postal/street/city"
+            onChangeText={(value) => {
+              setRecipientQuickSearch(value);
+              void runQuickSearch('recipient', value);
+            }}
+            suggestions={recipientSuggestions}
+            onSelectSuggestion={(entry) => {
+              const [mappedField] = getQuickSearchMapping(draft.recipientAddress.country);
+              if (!mappedField) {
+                return;
+              }
+              const safe = isSafeToChangeAddress(draft.recipientAddress, entry, ['country']);
+              if (!safe) {
+                setQuickSearchWarning('Suggestion blocked because country mismatch is not allowed.');
+                return;
+              }
+              replaceDraftAddress('recipient', entry);
+              setRecipientSuggestions([]);
+              setRecipientQuickSearch(String(entry[mappedField]));
+              setQuickSearchWarning('');
+            }}
+          />
           <View style={ui.row}>
             <PrimaryButton label="Private" onPress={() => updateAddressField('recipient', 'type', 'private')} />
             <PrimaryButton label="Business" onPress={() => updateAddressField('recipient', 'type', 'business')} />
@@ -371,7 +349,11 @@ export function SendBasicScreen({ navigation }: Props) {
         </SectionCard>
         <QuickAddParcelsCard draft={draft} onApply={setDraft} />
 
-        <PrimaryButton label="Next: Address details" onPress={next} />
+        <SubmitAndBackButtons
+          continueLabel="Next: Address details"
+          onContinue={next}
+          onBack={() => navigation.navigate('SendBasic')}
+        />
         <ShippingFlowSidePanel draft={draft} />
         <View style={{ height: 40 }} />
       </ScrollView>

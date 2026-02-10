@@ -9,6 +9,7 @@ import { hasQuickAddressErrors, hasQuickHomeErrors } from '../../domain/quickFlo
 import { validateStepShipmentDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
+import { SubmitAndBackButtons } from '../../components/SubmitAndBackButtons';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendQuickShipmentDetails'>;
 
@@ -20,6 +21,8 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
   const checkoutError = useAppStore((state) => state.checkoutError);
   const isBusy = useAppStore((state) => state.isBusy);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
+  const isPrivateSender = draft.senderAddress.type === 'private';
+  const isSweden = draft.senderAddress.country === 'SE' || draft.recipientAddress.country === 'SE';
 
   const updateItem = (
     index: number,
@@ -130,6 +133,10 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
             <SecondaryButton label="I already have it" onPress={() => updateDraftField('createCommerceProformaInvoice', false)} />
             <SecondaryButton label="Create now" onPress={() => updateDraftField('createCommerceProformaInvoice', true)} />
           </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <SecondaryButton label="Simple mode" onPress={() => setDraft({ ...draft, commerceInvoiceMode: 'simple' })} />
+            <SecondaryButton label="Power mode" onPress={() => setDraft({ ...draft, commerceInvoiceMode: 'power' })} />
+          </View>
           <ErrorText text={errors?.createCommerceProformaInvoice} />
           {draft.createCommerceProformaInvoice ? (
             <View style={{ gap: 6 }}>
@@ -175,6 +182,21 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
               <Text style={{ color: '#667085' }}>
                 Items total weight: {draft.items.reduce((sum, item) => sum + (item.weight ?? 0), 0).toFixed(2)} kg
               </Text>
+              {draft.commerceInvoiceMode === 'power' ? (
+                <View style={{ gap: 6, borderWidth: 1, borderColor: '#EAECF0', borderRadius: 10, padding: 10 }}>
+                  <Text style={{ fontWeight: '700' }}>Commercial invoice power mode</Text>
+                  <Label>Invoice number</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.invoiceNumber}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, invoiceNumber: value } })}
+                  />
+                  <Label>Export reason</Label>
+                  <FieldInput
+                    value={draft.commerceInvoiceMeta.exportReason}
+                    onChangeText={(value) => setDraft({ ...draft, commerceInvoiceMeta: { ...draft.commerceInvoiceMeta, exportReason: value } })}
+                  />
+                </View>
+              ) : null}
             </View>
           ) : null}
         </SectionCard>
@@ -228,16 +250,31 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
               }
             />
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text>Dangerous goods</Text>
-            <Switch
-              value={Boolean(draft.addons.dangerous)}
-              onValueChange={(value) =>
-                setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } })
-              }
-            />
-          </View>
+          {!isPrivateSender && !isSweden ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Dangerous goods</Text>
+              <Switch
+                value={Boolean(draft.addons.dangerous)}
+                onValueChange={(value) =>
+                  setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } })
+                }
+              />
+            </View>
+          ) : null}
         </SectionCard>
+        {draft.addons.dangerous ? (
+          <SectionCard>
+            <Text style={{ fontWeight: '700' }}>Dangerous goods section</Text>
+            <Label>UN Number</Label>
+            <FieldInput value={draft.dangerousGoods.unNumber} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, unNumber: value } })} />
+            <Label>Hazard class</Label>
+            <FieldInput value={draft.dangerousGoods.hazardClass} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, hazardClass: value } })} />
+            <Label>Packing group</Label>
+            <FieldInput value={draft.dangerousGoods.packingGroup} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, packingGroup: value } })} />
+            <Label>Emergency contact</Label>
+            <FieldInput value={draft.dangerousGoods.emergencyContact} onChangeText={(value) => setDraft({ ...draft, dangerousGoods: { ...draft.dangerousGoods, emergencyContact: value } })} />
+          </SectionCard>
+        ) : null}
 
         {checkoutError ? (
           <BackAndTryAgainCard
@@ -247,8 +284,12 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
           />
         ) : null}
 
-        <PrimaryButton label="Submit quick shipment" onPress={sendQuick} loading={isBusy} />
-        <SecondaryButton label="Back to address details" onPress={() => navigation.goBack()} />
+        <SubmitAndBackButtons
+          continueLabel="Submit quick shipment"
+          onContinue={sendQuick}
+          onBack={() => navigation.goBack()}
+          loading={isBusy}
+        />
         <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>
