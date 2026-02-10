@@ -1,4 +1,4 @@
-import { ScrollView, Text } from 'react-native';
+import { ScrollView, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard } from '../../components/ui';
@@ -12,6 +12,7 @@ type Props = NativeStackScreenProps<SendStackParamList, 'SendAddressDetails'>;
 
 export function SendAddressDetailsScreen({ navigation }: Props) {
   const draft = useAppStore((state) => state.currentDraft);
+  const setDraft = useAppStore((state) => state.setDraft);
   const updateAddressField = useAppStore((state) => state.updateAddressField);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepAddressDetails> | null>(null);
 
@@ -67,6 +68,28 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
           <FieldInput value={draft.recipientAddress.postalCode} onChangeText={(v) => updateAddressField('recipient', 'postalCode', v)} />
           <Label>Country</Label>
           <FieldInput value={draft.recipientAddress.country} onChangeText={(v) => updateAddressField('recipient', 'country', v)} autoCapitalize="characters" />
+        </SectionCard>
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Delivery instructions</Text>
+          <Label>Delivery note</Label>
+          <FieldInput
+            value={draft.instructions ?? ''}
+            onChangeText={(value) => setDraft({ ...draft, instructions: value })}
+            placeholder="Door code, preferred times, etc."
+          />
+          <Label>Pickup note</Label>
+          <FieldInput
+            value={draft.instructionsPickUp ?? ''}
+            onChangeText={(value) => setDraft({ ...draft, instructionsPickUp: value })}
+            placeholder="Pickup handling notes"
+          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text>Return freight doc</Text>
+            <Switch
+              value={draft.returnFreightDoc}
+              onValueChange={(value) => setDraft({ ...draft, returnFreightDoc: value })}
+            />
+          </View>
         </SectionCard>
 
         <PrimaryButton label="Next: Shipment details" onPress={next} />

@@ -6,6 +6,7 @@ import { SendStepHeader } from '../../components/SendStepHeader';
 import { RecentShipmentsPanel } from '../../components/RecentShipmentsPanel';
 import { QuickAddParcelsCard } from '../../components/QuickAddParcelsCard';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
+import { ConsignmentTemplateCard } from '../../components/ConsignmentTemplateCard';
 import { validateStepBasic } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
@@ -84,6 +85,7 @@ export function SendBasicScreen({ navigation }: Props) {
       <ScrollView>
         <SendStepHeader currentStep={1} />
         <Heading>Send - Basic</Heading>
+        <ConsignmentTemplateCard draft={draft} onApply={setDraft} />
         <RecentShipmentsPanel
           shipments={shipments}
           onReorder={(shipment) => {

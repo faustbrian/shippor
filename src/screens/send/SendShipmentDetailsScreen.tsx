@@ -49,6 +49,20 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
     });
   };
 
+  const addQuickItem = () => {
+    const index = draft.items.length;
+    upsertItem(index, {
+      id: `item-${index + 1}`,
+      description: 'T-shirt',
+      countryOfOrigin: 'US',
+      hsTariffCode: '6109',
+      quantity: 1,
+      quantityUnit: 'pcs',
+      weight: 0.3,
+      value: 20,
+    });
+  };
+
   const next = () => {
     const result = validateStepShipmentDetails(draft);
     setErrors(result);
@@ -87,6 +101,7 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
 
           {draft.createCommerceProformaInvoice ? (
             <View style={{ gap: 6 }}>
+              <PrimaryButton label="Quick add item" onPress={addQuickItem} />
               <Label>Item description</Label>
               <FieldInput value={firstItem.description} onChangeText={(v) => upsertItem(0, { ...firstItem, description: v })} />
               <Label>Quantity</Label>
@@ -108,6 +123,11 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
                 onChangeText={(v) => upsertItem(0, { ...firstItem, value: v ? Number(v) : null })}
               />
               <ErrorText text={errors?.items?.[firstItem.id] || errors?.items?.shipmentItems} />
+              {draft.items.length > 1 ? (
+                <Text style={{ color: '#667085' }}>
+                  Additional items in draft: {draft.items.length - 1} (quick-added)
+                </Text>
+              ) : null}
             </View>
           ) : null}
         </SectionCard>

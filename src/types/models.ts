@@ -60,6 +60,9 @@ export interface ShipmentDraft {
   contents: string;
   reference: string;
   value: string;
+  instructions?: string;
+  instructionsPickUp?: string;
+  returnFreightDoc: boolean;
   createCommerceProformaInvoice: boolean | null;
   items: ShipmentItem[];
   selectedMethod: ShippingMethod | null;
