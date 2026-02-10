@@ -1,11 +1,13 @@
 import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AppScreen, FieldInput, Heading, Label, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
+import type { Address } from '../../types/models';
+import { fetchAddressSuggestions } from '../../api/mockApi';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendQuickStart'>;
 
@@ -17,10 +19,51 @@ export function SendQuickStartScreen({ navigation }: Props) {
   const methods = useAppStore((state) => state.shippingMethods);
   const submitQuickShipment = useAppStore((state) => state.submitQuickShipment);
   const isBusy = useAppStore((state) => state.isBusy);
+  const replaceDraftAddress = useAppStore((state) => state.replaceDraftAddress);
+  const [senderQuickSearch, setSenderQuickSearch] = useState('');
+  const [recipientQuickSearch, setRecipientQuickSearch] = useState('');
+  const [senderSuggestions, setSenderSuggestions] = useState<Address[]>([]);
+  const [recipientSuggestions, setRecipientSuggestions] = useState<Address[]>([]);
 
   useEffect(() => {
     void loadShippingMethods();
   }, [loadShippingMethods]);
+
+  const normalize = (value: string) => value.replace(/\s+/g, '');
+
+  const runQuickSearch = async (role: 'sender' | 'recipient', typedValue: string) => {
+    const country = role === 'sender' ? draft.senderAddress.country : draft.recipientAddress.country;
+    const suggestions = await fetchAddressSuggestions(typedValue, country);
+
+    if (suggestions.length === 1) {
+      replaceDraftAddress(role, suggestions[0]);
+      if (role === 'sender') {
+        setSenderSuggestions([]);
+      } else {
+        setRecipientSuggestions([]);
+      }
+      return;
+    }
+
+    if (
+      suggestions.length > 1 &&
+      normalize(suggestions[0].postalCode.toLowerCase()) === normalize(typedValue.toLowerCase())
+    ) {
+      replaceDraftAddress(role, suggestions[0]);
+      if (role === 'sender') {
+        setSenderSuggestions([]);
+      } else {
+        setRecipientSuggestions([]);
+      }
+      return;
+    }
+
+    if (role === 'sender') {
+      setSenderSuggestions(suggestions);
+    } else {
+      setRecipientSuggestions(suggestions);
+    }
+  };
 
   const sendQuick = async () => {
     const ok = await submitQuickShipment();
@@ -37,10 +80,50 @@ export function SendQuickStartScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Addresses</Text>
+          <Label>Sender quick search</Label>
+          <FieldInput
+            value={senderQuickSearch}
+            onChangeText={(value) => {
+              setSenderQuickSearch(value);
+              void runQuickSearch('sender', value);
+            }}
+            placeholder="Sender postal/street/city"
+          />
+          {senderSuggestions.map((entry) => (
+            <SecondaryButton
+              key={`quick-sender-${entry.id}`}
+              label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
+              onPress={() => {
+                replaceDraftAddress('sender', entry);
+                setSenderSuggestions([]);
+                setSenderQuickSearch(entry.postalCode);
+              }}
+            />
+          ))}
           <Label>Sender name</Label>
           <FieldInput value={draft.senderAddress.name} onChangeText={(v) => updateAddressField('sender', 'name', v)} />
           <Label>Sender city</Label>
           <FieldInput value={draft.senderAddress.city} onChangeText={(v) => updateAddressField('sender', 'city', v)} />
+          <Label>Recipient quick search</Label>
+          <FieldInput
+            value={recipientQuickSearch}
+            onChangeText={(value) => {
+              setRecipientQuickSearch(value);
+              void runQuickSearch('recipient', value);
+            }}
+            placeholder="Recipient postal/street/city"
+          />
+          {recipientSuggestions.map((entry) => (
+            <SecondaryButton
+              key={`quick-recipient-${entry.id}`}
+              label={`${entry.postalCode} ${entry.street}, ${entry.city}`}
+              onPress={() => {
+                replaceDraftAddress('recipient', entry);
+                setRecipientSuggestions([]);
+                setRecipientQuickSearch(entry.postalCode);
+              }}
+            />
+          ))}
           <Label>Recipient name</Label>
           <FieldInput value={draft.recipientAddress.name} onChangeText={(v) => updateAddressField('recipient', 'name', v)} />
           <Label>Recipient city</Label>
