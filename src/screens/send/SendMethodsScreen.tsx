@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppScreen, ErrorText, Heading, Label, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
+import { AppScreen, ErrorText, Heading, Label, PrimaryButton, SectionCard } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { filterShippingMethodsByType, getShippingMethodValidationErrors } from '../../domain/shippingMethods';
 import { useAppStore } from '../../store/useAppStore';
@@ -13,6 +13,32 @@ import { Switch } from 'react-native';
 import { ShippingMethodsLoadingPlaceholder } from '../../components/ShippingMethodsLoadingPlaceholder';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendMethods'>;
+
+function FilterChip({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        borderWidth: 1,
+        borderColor: active ? '#0A66FF' : '#D0D5DD',
+        backgroundColor: active ? '#EEF4FF' : '#fff',
+        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 7,
+      }}
+    >
+      <Text style={{ color: active ? '#0A66FF' : '#344054', fontWeight: '700', fontSize: 12 }}>{label}</Text>
+    </Pressable>
+  );
+}
 
 export function SendMethodsScreen({ navigation }: Props) {
   const loadShippingMethods = useAppStore((state) => state.loadShippingMethods);
@@ -116,29 +142,17 @@ export function SendMethodsScreen({ navigation }: Props) {
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Method type</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            <SecondaryButton label={`All (${methods.length})`} onPress={() => setSelectedTab('all')} />
-            <SecondaryButton label={`Pickup (${pickupMethods.length})`} onPress={() => setSelectedTab('pickup')} />
-            <SecondaryButton label={`Home (${homeMethods.length})`} onPress={() => setSelectedTab('home')} />
-            <SecondaryButton label={`Return (${returnMethods.length})`} onPress={() => setSelectedTab('return')} />
+            <FilterChip label={`All (${methods.length})`} active={selectedTab === 'all'} onPress={() => setSelectedTab('all')} />
+            <FilterChip label={`Pickup (${pickupMethods.length})`} active={selectedTab === 'pickup'} onPress={() => setSelectedTab('pickup')} />
+            <FilterChip label={`Home (${homeMethods.length})`} active={selectedTab === 'home'} onPress={() => setSelectedTab('home')} />
+            <FilterChip label={`Return (${returnMethods.length})`} active={selectedTab === 'return'} onPress={() => setSelectedTab('return')} />
           </View>
         </SectionCard>
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Sort</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <SecondaryButton
-              label="Fastest"
-              onPress={() => {
-                setSortShippingMethodsState('deliveryTime');
-                refreshMethods();
-              }}
-            />
-            <SecondaryButton
-              label="Cheapest"
-              onPress={() => {
-                setSortShippingMethodsState('price');
-                refreshMethods();
-              }}
-            />
+            <FilterChip label="Fastest" onPress={() => { setSortShippingMethodsState('deliveryTime'); refreshMethods(); }} />
+            <FilterChip label="Cheapest" onPress={() => { setSortShippingMethodsState('price'); refreshMethods(); }} />
           </View>
         </SectionCard>
         <SectionCard>
@@ -236,7 +250,8 @@ export function SendMethodsScreen({ navigation }: Props) {
         ) : null}
 
         <SectionCard>
-          <Text>Selected: {draft.selectedMethod?.label ?? 'None'}</Text>
+          <Text style={{ fontWeight: '800' }}>Selected delivery option</Text>
+          <Text style={{ color: '#475467' }}>{draft.selectedMethod?.label ?? 'None'}</Text>
           <ErrorText text={shippingMethodError} />
         </SectionCard>
         <ShippingMethodInstructionsPanel method={draft.selectedMethod} />

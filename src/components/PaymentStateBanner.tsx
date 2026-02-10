@@ -48,14 +48,15 @@ export function PaymentStateBanner({
       style={{
         borderWidth: 1,
         borderColor: data.border,
+        borderLeftWidth: 4,
         backgroundColor: data.bg,
-        borderRadius: 12,
+        borderRadius: 10,
         padding: 12,
         gap: 6,
       }}
     >
-      <Text style={{ fontWeight: '800', color: palette.ink }}>{data.title}</Text>
-      <Text style={{ color: '#475467' }}>{data.message}</Text>
+      <Text style={{ fontWeight: '800', color: palette.ink, fontSize: 13, letterSpacing: 0.2 }}>{data.title}</Text>
+      <Text style={{ color: '#475467', fontSize: 13 }}>{data.message}</Text>
       {state === 'failed-payment' && onRetry ? <PrimaryButton label="Retry payment" onPress={onRetry} /> : null}
     </View>
   );
