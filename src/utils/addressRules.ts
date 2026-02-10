@@ -67,3 +67,36 @@ export function stripDialCodePrefix(phone: string, country: string): string {
 
   return compact.replace(/^\+/, '');
 }
+
+export function parsePhoneLocalFromInput(input: string, country: string): string {
+  const compact = input.replace(/\s+/g, '');
+  if (!compact) {
+    return '';
+  }
+
+  const dial = getCountryDialCode(country).replace('+', '');
+  const digitsOnly = compact.replace(/[^\d+]/g, '');
+  const withoutPlus = digitsOnly.replace(/^\+/, '');
+
+  if (dial && withoutPlus.startsWith(dial)) {
+    let local = withoutPlus.slice(dial.length);
+    if (dial === '358' && local.startsWith('0')) {
+      local = local.slice(1);
+    }
+    return local;
+  }
+
+  if (withoutPlus.startsWith('00') && dial && withoutPlus.slice(2).startsWith(dial)) {
+    let local = withoutPlus.slice(2 + dial.length);
+    if (dial === '358' && local.startsWith('0')) {
+      local = local.slice(1);
+    }
+    return local;
+  }
+
+  if (withoutPlus.startsWith('0')) {
+    return withoutPlus.slice(1);
+  }
+
+  return withoutPlus;
+}

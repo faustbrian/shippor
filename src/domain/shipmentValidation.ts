@@ -1,5 +1,10 @@
 import { countryMeta, type CountryMeta } from './countryMeta';
 import type { Address, ShipmentDraft } from '../types/models';
+import {
+  isVatTaxIdRequired,
+  shouldShowEmployerIdentificationNumber,
+  shouldShowSocialSecurityNumber,
+} from './addressVisibility';
 
 type FieldErrors = Record<string, string>;
 
@@ -285,7 +290,24 @@ function isAddressFieldRequired({
   }
 
   if (fieldName === 'vatNumber') {
-    return isInternationalShipment(shipment);
+    return isVatTaxIdRequired(address, senderOrRecipient, shipment);
+  }
+
+  if (fieldName === 'socialSecurityNumber') {
+    if (!shouldShowSocialSecurityNumber(address, shipment.payingAddress, senderOrRecipient)) {
+      return false;
+    }
+    if (senderOrRecipient === 'sender') {
+      return address.type === 'private';
+    }
+    if (senderOrRecipient === 'recipient' && address.country === 'KR') {
+      return address.type === 'private';
+    }
+    return false;
+  }
+
+  if (fieldName === 'employerIdentificationNumber') {
+    return shouldShowEmployerIdentificationNumber(address, senderOrRecipient);
   }
 
   return false;
@@ -307,6 +329,8 @@ function getFullAddressValidationErrors(shipment: ShipmentDraft, address: Addres
     'phone',
     'eori',
     'vatNumber',
+    'socialSecurityNumber',
+    'employerIdentificationNumber',
   ];
 
   for (const field of fields) {

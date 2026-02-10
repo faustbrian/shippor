@@ -2,64 +2,14 @@ import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import type { Address, ShipmentDraft } from '../types/models';
 import { ErrorText, FieldInput, Label, PrimaryButton } from './ui';
-import { getCountryDialCode, showAddressLine2Field, showPostalCodeField, showStateField, stripDialCodePrefix } from '../utils/addressRules';
-
-const VAT_REQUIREMENTS_BY_COUNTRY: Record<string, string[]> = {
-  BR: ['CPF (individual)', 'CNPJ (business)'],
-  KR: ['PCCC (Personal Customs Clearance Code)'],
-  CN: ['Resident ID', 'Customs Reg. Code'],
-  TW: ['National ID', 'GUI number'],
-  TR: ['TCKN (individual)', 'VKN (business)'],
-  AR: ['CUIT', 'CUIL'],
-  CO: ['NIT', 'Cedula de Ciudadania'],
-  ID: ['NPWP'],
-  VN: ['Tax Code', 'ID'],
-  CL: ['RUT'],
-  PE: ['RUC', 'DNI'],
-  CR: ['DNI', 'ID number'],
-  AE: ['Emirates ID', 'Trade license'],
-  EC: ['RUC', 'Cedula'],
-  ZA: ['National ID', 'Tax ID'],
-  PA: ['RUC'],
-  IN: ['PAN (Permanent Account Number)'],
-  NG: ['National ID', 'Tax ID'],
-  TH: ['Tax ID', 'Passport'],
-  SA: ['National ID', 'Iqama', 'CR Number'],
-};
-
-function shouldShowSocialSecurityNumber(address: Address, payingAddress: Address, role: 'sender' | 'recipient') {
-  if (role === 'recipient' && (address.country === 'US' || address.country === 'KR')) {
-    return address.type === 'private';
-  }
-
-  if (role !== 'sender') {
-    return false;
-  }
-
-  return (
-    address.country === 'SE' &&
-    payingAddress.country === 'SE' &&
-    payingAddress.type !== 'business' &&
-    address.type === 'private'
-  );
-}
-
-function shouldShowEmployerIdentificationNumber(address: Address, role: 'sender' | 'recipient') {
-  return role === 'recipient' && address.country === 'US' && address.type === 'business';
-}
-
-function shouldShowVatField(address: Address, role: 'sender' | 'recipient', draft: ShipmentDraft) {
-  if (role !== 'recipient') {
-    return false;
-  }
-
-  const methodName = `${draft.selectedMethod?.label ?? ''} ${draft.selectedMethod?.serviceId ?? ''}`.toLowerCase();
-  if (!methodName.includes('asendia')) {
-    return false;
-  }
-
-  return Boolean(VAT_REQUIREMENTS_BY_COUNTRY[address.country]);
-}
+import { showAddressLine2Field, showPostalCodeField, showStateField } from '../utils/addressRules';
+import {
+  shouldShowEmployerIdentificationNumber,
+  shouldShowSocialSecurityNumber,
+  shouldShowVatTaxIdInput,
+} from '../domain/addressVisibility';
+import { getVatTaxIdTypes } from '../domain/vatRequirement';
+import { CountryAwarePhoneInput } from './CountryAwarePhoneInput';
 
 export function AddressDetailsFieldset({
   role,
@@ -82,10 +32,8 @@ export function AddressDetailsFieldset({
   const showPostal = showPostalCodeField(address.country);
   const showState = showStateField(address.country);
   const isBusiness = address.type === 'business';
-  const dialCode = getCountryDialCode(address.country);
-  const localPhone = stripDialCodePrefix(address.phone, address.country);
-  const vatTaxIdTypes = VAT_REQUIREMENTS_BY_COUNTRY[address.country] ?? [];
-  const showVat = shouldShowVatField(address, role, draft);
+  const vatTaxIdTypes = getVatTaxIdTypes(address.country);
+  const showVat = shouldShowVatTaxIdInput(address, role, draft);
   const showSsn = shouldShowSocialSecurityNumber(address, draft.payingAddress, role);
   const showEin = shouldShowEmployerIdentificationNumber(address, role);
   const fieldErrors = errors ?? {};
@@ -147,11 +95,7 @@ export function AddressDetailsFieldset({
       <FieldInput value={address.country} onChangeText={(v) => onChangeField('country', v.toUpperCase())} autoCapitalize="characters" />
       <ErrorText text={fieldErrors.country} />
 
-      <Label>Phone country code</Label>
-      <FieldInput value={dialCode || 'N/A'} editable={false} />
-
-      <Label>Phone</Label>
-      <FieldInput value={localPhone} onChangeText={(v) => onChangeField('phone', v)} placeholder="Local number" keyboardType="phone-pad" />
+      <CountryAwarePhoneInput country={address.country} value={address.phone} onChange={(v) => onChangeField('phone', v)} />
       <ErrorText text={fieldErrors.phone} />
 
       <Label>{role === 'sender' ? 'Sender email' : 'Email'}</Label>
