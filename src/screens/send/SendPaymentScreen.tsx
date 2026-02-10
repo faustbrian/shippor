@@ -49,7 +49,7 @@ export function SendPaymentScreen({ navigation }: Props) {
 
   return (
     <AppScreen>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <SendStepHeader currentStep={6} />
         <Heading>Send - Payment</Heading>
         <PaymentStateBanner
@@ -80,9 +80,9 @@ export function SendPaymentScreen({ navigation }: Props) {
         <AgreeToTermsFieldset value={agreeToTerms} onValueChange={setAgreeToTerms} />
         <SectionCard>
           <Text style={{ fontWeight: '800' }}>Payment and shipment status</Text>
-          <Text>{selectedPaymentMethod ? 'Ready for payment' : 'Select method to continue'}</Text>
-          <Text>{agreeToTerms ? 'Terms accepted' : 'Terms not accepted'}</Text>
-          <Text>Flow state: {checkoutFlowState}</Text>
+          <Text style={{ color: '#475467' }}>{selectedPaymentMethod ? 'Ready for payment' : 'Select method to continue'}</Text>
+          <Text style={{ color: '#475467' }}>{agreeToTerms ? 'Terms accepted' : 'Terms not accepted'}</Text>
+          <Text style={{ color: '#475467' }}>Flow state: {checkoutFlowState}</Text>
           {Object.values(cartItemErrors).some(Boolean) ? (
             <Text style={{ color: '#D92D20' }}>
               Failed cart items detected. Update failed items or retry non-failing items.
@@ -98,10 +98,12 @@ export function SendPaymentScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '800' }}>Checkout totals</Text>
-          <Text>Items: {cart.length}</Text>
-          <Text>Subtotal: ${totals.subtotal.toFixed(2)}</Text>
-          <Text>Fee: ${totals.fee.toFixed(2)}</Text>
-          <Text style={{ fontWeight: '700' }}>Total: ${totals.total.toFixed(2)}</Text>
+          <Text style={{ color: '#475467' }}>Items: {cart.length}</Text>
+          <Text style={{ color: '#475467' }}>Subtotal: ${totals.subtotal.toFixed(2)}</Text>
+          <Text style={{ color: '#475467' }}>Fee: ${totals.fee.toFixed(2)}</Text>
+          <View style={{ borderTopWidth: 1, borderTopColor: '#EAECF0', paddingTop: 8 }}>
+            <Text style={{ fontWeight: '800' }}>Total: ${totals.total.toFixed(2)}</Text>
+          </View>
         </SectionCard>
         <CartSidePanelMobile
           itemsCount={cart.length}

@@ -78,8 +78,10 @@ export function SendMethodsScreen({ navigation }: Props) {
             justifyContent: 'space-between',
           }}
         >
-          <Text style={{ fontWeight: '800' }}>{title}</Text>
-          <Text style={{ color: '#667085' }}>{list.length} option(s)</Text>
+          <Text style={{ fontWeight: '800', fontSize: 13, color: '#344054', letterSpacing: 0.3 }}>
+            {title.toUpperCase()}
+          </Text>
+          <Text style={{ color: '#667085', fontSize: 12 }}>{list.length} option(s)</Text>
         </View>
         {list.map((method) => (
           <ShippingMethodCard
@@ -108,7 +110,7 @@ export function SendMethodsScreen({ navigation }: Props) {
 
   return (
     <AppScreen>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <SendStepHeader currentStep={4} />
         <Heading>Send - Methods</Heading>
         <SectionCard>
@@ -241,7 +243,7 @@ export function SendMethodsScreen({ navigation }: Props) {
 
         {draft.selectedMethod?.isPickupLocationMethod ? (
           <SectionCard>
-            <Label>Pickup point</Label>
+            <Label>Select pickup point address</Label>
             {pickupLocations.map((location) => (
               <Pressable
                 key={location.id}
@@ -253,13 +255,18 @@ export function SendMethodsScreen({ navigation }: Props) {
                   borderWidth: 1,
                   borderColor: draft.pickupLocationId === location.id ? '#0A66FF' : '#D0D5DD',
                   borderRadius: 10,
-                  padding: 10,
+                  padding: 12,
                   marginBottom: 8,
-                  backgroundColor: '#fff',
+                  backgroundColor: draft.pickupLocationId === location.id ? '#EEF4FF' : '#fff',
                 }}
               >
-                <Text style={{ fontWeight: '700' }}>{location.name}</Text>
-                <Text>{location.address1}, {location.zipcode}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={{ fontWeight: '700' }}>{location.name}</Text>
+                  <Text style={{ color: draft.pickupLocationId === location.id ? '#0A66FF' : '#667085', fontWeight: '700', fontSize: 12 }}>
+                    {draft.pickupLocationId === location.id ? 'Selected' : 'Choose'}
+                  </Text>
+                </View>
+                <Text style={{ color: '#475467' }}>{location.address1}, {location.zipcode}</Text>
               </Pressable>
             ))}
             <ErrorText text={pickupError} />

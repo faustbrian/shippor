@@ -32,28 +32,28 @@ export function SendCartScreen({ navigation }: Props) {
 
   return (
     <AppScreen>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <SendStepHeader currentStep={5} />
         <Heading>Send - Cart & Checkout</Heading>
 
         <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Checkout State</Text>
-          <Text>Flow: {checkoutFlowState}</Text>
-          <Text>Selected payment: {selectedPaymentMethod || 'Not selected'}</Text>
-          <Text>Agreed to terms: {agreeToTerms ? 'Yes' : 'No'}</Text>
+          <Text style={{ fontWeight: '800' }}>Checkout State</Text>
+          <Text style={{ color: '#475467' }}>Flow: {checkoutFlowState}</Text>
+          <Text style={{ color: '#475467' }}>Selected payment: {selectedPaymentMethod || 'Not selected'}</Text>
+          <Text style={{ color: '#475467' }}>Agreed to terms: {agreeToTerms ? 'Yes' : 'No'}</Text>
         </SectionCard>
         <PaymentStateBanner state={checkoutFlowState} />
 
         <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Current shipment draft</Text>
-          <Text>{draft.senderAddress.city || 'Sender'} {'->'} {draft.recipientAddress.city || 'Recipient'}</Text>
-          <Text>Method: {draft.selectedMethod?.label ?? 'Not selected'}</Text>
-          <Text>Price: ${draft.selectedMethod?.price.toFixed(2) ?? '0.00'}</Text>
+          <Text style={{ fontWeight: '800' }}>Current shipment draft</Text>
+          <Text style={{ color: '#475467' }}>{draft.senderAddress.city || 'Sender'} {'->'} {draft.recipientAddress.city || 'Recipient'}</Text>
+          <Text style={{ color: '#475467' }}>Method: {draft.selectedMethod?.label ?? 'Not selected'}</Text>
+          <Text style={{ color: '#475467' }}>Price: ${draft.selectedMethod?.price.toFixed(2) ?? '0.00'}</Text>
           <PrimaryButton label="Add draft to cart" onPress={addDraftToCart} disabled={!draft.selectedMethod} />
         </SectionCard>
 
         <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Cart items</Text>
+          <Text style={{ fontWeight: '800' }}>Cart items</Text>
           {!cart.length ? (
             <EmptyCartCard
               onGoMethods={() => navigation.navigate('SendMethods')}

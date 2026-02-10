@@ -15,14 +15,16 @@ export function SendThankYouScreen({ navigation }: Props) {
 
   return (
     <AppScreen>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <SendStepHeader currentStep={7} />
         <Heading>Thank You</Heading>
 
         <ThankYouBoxForMultipleCartItems shipments={shipments} />
         <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Checkout state: {checkoutFlowState}</Text>
-          <Text style={{ color: '#667085' }}>Documents are generated from stubbed APIs in this build.</Text>
+          <Text style={{ fontWeight: '800' }}>Checkout state: {checkoutFlowState}</Text>
+          <Text style={{ color: '#667085', fontSize: 12 }}>
+            Documents are generated from stubbed APIs in this build.
+          </Text>
         </SectionCard>
         {shipments.map((shipment) => (
           <DocumentsDownloadFieldset
