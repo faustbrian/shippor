@@ -17,6 +17,7 @@ export type SendStackParamList = {
   SendCart: undefined;
   SendPayment: undefined;
   SendThankYou: undefined;
+  SendError: undefined;
 };
 
 export type RootTabParamList = {

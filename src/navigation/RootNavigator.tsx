@@ -17,6 +17,7 @@ import { ShipmentsScreen } from '../screens/shipments/ShipmentsScreen';
 import { SendAddressDetailsScreen } from '../screens/send/SendAddressDetailsScreen';
 import { SendBasicScreen } from '../screens/send/SendBasicScreen';
 import { SendCartScreen } from '../screens/send/SendCartScreen';
+import { SendErrorScreen } from '../screens/send/SendErrorScreen';
 import { SendMethodsScreen } from '../screens/send/SendMethodsScreen';
 import { SendPaymentScreen } from '../screens/send/SendPaymentScreen';
 import { SendQuickAddressDetailsScreen } from '../screens/send/SendQuickAddressDetailsScreen';
@@ -57,6 +58,7 @@ function SendNavigator() {
       <SendStack.Screen name="SendCart" component={SendCartScreen} options={{ title: 'Cart & checkout' }} />
       <SendStack.Screen name="SendPayment" component={SendPaymentScreen} options={{ title: 'Payment' }} />
       <SendStack.Screen name="SendThankYou" component={SendThankYouScreen} options={{ title: 'Thank You' }} />
+      <SendStack.Screen name="SendError" component={SendErrorScreen} options={{ title: 'Error' }} />
     </SendStack.Navigator>
   );
 }

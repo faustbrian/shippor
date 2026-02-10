@@ -49,6 +49,8 @@ export interface ShippingMethod {
   eta: string;
   carrier: string;
   price: number;
+  priceVat0?: number;
+  vatRate?: number;
   deliveryTime: string;
   serviceId: string;
   printerRequired: boolean;

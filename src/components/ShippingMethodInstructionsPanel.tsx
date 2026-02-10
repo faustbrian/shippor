@@ -33,6 +33,10 @@ export function ShippingMethodInstructionsPanel({ method }: { method: ShippingMe
         {method.label}
       </Text>
       <Text>{method.carrier} • ETA {method.eta}</Text>
+      <Text>
+        Price: ${method.price.toFixed(2)}
+        {method.priceVat0 ? ` (ex VAT $${method.priceVat0.toFixed(2)})` : ''}
+      </Text>
       <View style={{ gap: 4, marginTop: 6 }}>
         {notes.map((note) => (
           <Text key={note}>• {note}</Text>

@@ -7,6 +7,9 @@ import { SendStepHeader } from '../../components/SendStepHeader';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { CartSidePanelMobile } from '../../components/CartSidePanelMobile';
 import { PaymentStateBanner } from '../../components/PaymentStateBanner';
+import { EmptyCartCard } from '../../components/EmptyCartCard';
+import { CartLoadingCard } from '../../components/CartLoadingCard';
+import { BackAndTryAgainCard } from '../../components/BackAndTryAgainCard';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendCart'>;
 
@@ -15,6 +18,7 @@ export function SendCartScreen({ navigation }: Props) {
   const cart = useAppStore((state) => state.cart);
   const cartItemErrors = useAppStore((state) => state.cartItemErrors);
   const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
+  const checkoutError = useAppStore((state) => state.checkoutError);
   const selectedPaymentMethod = useAppStore((state) => state.selectedPaymentMethod);
   const agreeToTerms = useAppStore((state) => state.agreeToTerms);
   const addDraftToCart = useAppStore((state) => state.addDraftToCart);
@@ -47,7 +51,12 @@ export function SendCartScreen({ navigation }: Props) {
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Cart items</Text>
-          {cart.length ? (
+          {!cart.length ? (
+            <EmptyCartCard
+              onGoMethods={() => navigation.navigate('SendMethods')}
+              onGoSend={() => navigation.navigate('SendBasic')}
+            />
+          ) : (
             cart.map((item) => (
               <View key={item.id} style={{ borderBottomWidth: 1, borderBottomColor: '#EEE', paddingVertical: 8 }}>
                 <Text style={{ fontWeight: '700' }}>{item.title}</Text>
@@ -76,10 +85,16 @@ export function SendCartScreen({ navigation }: Props) {
                 <SecondaryButton label="Remove" onPress={() => removeCartItem(item.id)} />
               </View>
             ))
-          ) : (
-            <Text>No items yet.</Text>
           )}
         </SectionCard>
+        {checkoutFlowState === 'pending' ? <CartLoadingCard /> : null}
+        {checkoutFlowState === 'failed-payment' && checkoutError ? (
+          <BackAndTryAgainCard
+            message={checkoutError}
+            onBack={() => navigation.navigate('SendMethods')}
+            onRetry={() => navigation.navigate('SendPayment')}
+          />
+        ) : null}
 
         <CartSidePanelMobile
           itemsCount={cart.length}

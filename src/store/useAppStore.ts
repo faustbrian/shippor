@@ -260,7 +260,18 @@ export const useAppStore = create<AppState>((set, get) => ({
       false,
       sortShippingMethodsState,
     );
-    set({ shippingMethods: [...homeMethods, ...pickupMethods, ...returnMethods] });
+    const nextMethods = [...homeMethods, ...pickupMethods, ...returnMethods];
+    const selectedMethod = currentDraft.selectedMethod
+      ? nextMethods.find((method) => method.id === currentDraft.selectedMethod?.id) ?? null
+      : null;
+
+    set({
+      shippingMethods: nextMethods,
+      currentDraft: {
+        ...currentDraft,
+        selectedMethod,
+      },
+    });
   },
 
   setSortShippingMethodsState(value) {

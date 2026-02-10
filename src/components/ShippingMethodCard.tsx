@@ -41,6 +41,11 @@ export function ShippingMethodCard({
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={{ fontWeight: '800', fontSize: 18 }}>${method.price.toFixed(2)}</Text>
+            {method.priceVat0 ? (
+              <Text style={{ color: '#667085', fontSize: 12 }}>
+                ex VAT ${method.priceVat0.toFixed(2)} ({method.vatRate ?? 0}% VAT)
+              </Text>
+            ) : null}
             <Text style={{ color: '#667085' }}>{method.eta}</Text>
           </View>
         </View>

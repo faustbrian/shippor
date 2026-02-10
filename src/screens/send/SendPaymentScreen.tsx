@@ -40,7 +40,9 @@ export function SendPaymentScreen({ navigation }: Props) {
     const ok = await submitCart();
     if (ok) {
       navigation.replace('SendThankYou');
+      return;
     }
+    navigation.navigate('SendError');
   };
 
   return (

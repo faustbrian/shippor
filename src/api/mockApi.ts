@@ -111,6 +111,8 @@ const shippingMethods: ShippingMethod[] = [
     eta: '1-2 business days',
     carrier: 'DHL',
     price: 24.5,
+    priceVat0: 19.76,
+    vatRate: 24,
     deliveryTime: '1-2',
     serviceId: 'dhl_express',
     printerRequired: false,
@@ -132,6 +134,8 @@ const shippingMethods: ShippingMethod[] = [
     eta: '3-5 business days',
     carrier: 'UPS',
     price: 14.75,
+    priceVat0: 11.9,
+    vatRate: 24,
     deliveryTime: '3-5',
     serviceId: 'ups_ground_pickup',
     printerRequired: true,
@@ -153,6 +157,8 @@ const shippingMethods: ShippingMethod[] = [
     eta: 'Same day',
     carrier: 'Local Courier',
     price: 39.0,
+    priceVat0: 31.45,
+    vatRate: 24,
     deliveryTime: '0',
     serviceId: 'wolt_same_day',
     printerRequired: false,
@@ -305,7 +311,28 @@ export async function fetchAddressSuggestions(search: string, country: string): 
 }
 
 export async function fetchShippingMethods(_draft: ShipmentDraft): Promise<ShippingMethod[]> {
-  return delay(shippingMethods);
+  const draft = _draft;
+  const surcharge =
+    (draft.addons.pickup ? 1.5 : 0) +
+    (draft.addons.delivery ? 2.0 : 0) +
+    (draft.addons.delivery09 ? 4.5 : 0) +
+    (draft.addons.fragile ? 1.25 : 0) +
+    (draft.addons.dangerous ? 6.0 : 0) +
+    (draft.addons.limitedQtys ? 3.0 : 0);
+
+  const dynamic = shippingMethods.map((method) => {
+    const price = Number((method.price + surcharge).toFixed(2));
+    const vatRate = method.vatRate ?? 24;
+    const priceVat0 = Number((price / (1 + vatRate / 100)).toFixed(2));
+    return {
+      ...method,
+      price,
+      priceVat0,
+      tags: surcharge > 0 ? [...(method.tags ?? []), 'Addons applied'] : method.tags,
+    };
+  });
+
+  return delay(dynamic);
 }
 
 export async function fetchPickupLocations(serviceId: string): Promise<PickupLocation[]> {

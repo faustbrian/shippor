@@ -9,6 +9,7 @@ import type { SendStackParamList } from '../../navigation/types';
 import { ShippingMethodCard } from '../../components/ShippingMethodCard';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { ShippingMethodInstructionsPanel } from '../../components/ShippingMethodInstructionsPanel';
+import { Switch } from 'react-native';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendMethods'>;
 
@@ -24,6 +25,11 @@ export function SendMethodsScreen({ navigation }: Props) {
   const [pickupError, setPickupError] = useState<string | undefined>();
   const [selectedTab, setSelectedTab] = useState<'all' | 'pickup' | 'home' | 'return'>('all');
   const [isLoadingMethods, setIsLoadingMethods] = useState(false);
+
+  const refreshMethods = () => {
+    setIsLoadingMethods(true);
+    void loadShippingMethods().finally(() => setIsLoadingMethods(false));
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -120,18 +126,81 @@ export function SendMethodsScreen({ navigation }: Props) {
               label="Fastest"
               onPress={() => {
                 setSortShippingMethodsState('deliveryTime');
-                setIsLoadingMethods(true);
-                void loadShippingMethods().finally(() => setIsLoadingMethods(false));
+                refreshMethods();
               }}
             />
             <SecondaryButton
               label="Cheapest"
               onPress={() => {
                 setSortShippingMethodsState('price');
-                setIsLoadingMethods(true);
-                void loadShippingMethods().finally(() => setIsLoadingMethods(false));
+                refreshMethods();
               }}
             />
+          </View>
+        </SectionCard>
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Additional services (updates method prices)</Text>
+          <View style={{ gap: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Shipment collection service</Text>
+              <Switch
+                value={Boolean(draft.addons.pickup)}
+                onValueChange={(value) => {
+                  setDraft({ ...draft, addons: { ...draft.addons, pickup: value } });
+                  refreshMethods();
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Doorstep delivery</Text>
+              <Switch
+                value={Boolean(draft.addons.delivery)}
+                onValueChange={(value) => {
+                  setDraft({ ...draft, addons: { ...draft.addons, delivery: value } });
+                  refreshMethods();
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Delivered by 9 AM</Text>
+              <Switch
+                value={Boolean(draft.addons.delivery09)}
+                onValueChange={(value) => {
+                  setDraft({ ...draft, addons: { ...draft.addons, delivery09: value } });
+                  refreshMethods();
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Fragile delivery</Text>
+              <Switch
+                value={Boolean(draft.addons.fragile)}
+                onValueChange={(value) => {
+                  setDraft({ ...draft, addons: { ...draft.addons, fragile: value } });
+                  refreshMethods();
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Dangerous substances</Text>
+              <Switch
+                value={Boolean(draft.addons.dangerous)}
+                onValueChange={(value) => {
+                  setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } });
+                  refreshMethods();
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text>Limited quantities</Text>
+              <Switch
+                value={Boolean(draft.addons.limitedQtys)}
+                onValueChange={(value) => {
+                  setDraft({ ...draft, addons: { ...draft.addons, limitedQtys: value } });
+                  refreshMethods();
+                }}
+              />
+            </View>
           </View>
         </SectionCard>
         {isLoadingMethods ? (
