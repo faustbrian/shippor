@@ -4,14 +4,14 @@ import type { Address } from '../types/models';
 export function AddressCard({ label, address }: { label: string; address: Address }) {
   return (
     <>
-      <Text style={{ fontWeight: '700' }}>{label}</Text>
+      <Text style={{ fontWeight: '800', fontSize: 12, color: '#344054' }}>{label}</Text>
       <Text>{address.organization || address.name || '-'}</Text>
-      <Text>{address.street || '-'}</Text>
+      <Text style={{ color: '#475467' }}>{address.street || '-'}</Text>
       {address.street2 ? <Text>{address.street2}</Text> : null}
-      <Text>{address.postalCode ? `${address.postalCode} ` : ''}{address.city || '-'}</Text>
-      <Text>{address.country || '-'}</Text>
-      <Text>{address.phone || '-'}</Text>
-      <Text>{address.email || '-'}</Text>
+      <Text style={{ color: '#475467' }}>{address.postalCode ? `${address.postalCode} ` : ''}{address.city || '-'}</Text>
+      <Text style={{ color: '#475467' }}>{address.country || '-'}</Text>
+      <Text style={{ color: '#667085', fontSize: 12 }}>{address.phone || '-'}</Text>
+      <Text style={{ color: '#667085', fontSize: 12 }}>{address.email || '-'}</Text>
     </>
   );
 }
