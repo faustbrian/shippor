@@ -3,7 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
-import { ShipmentSummaryCard } from '../../components/ShipmentSummaryCard';
+import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { validateStepAddressDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
@@ -70,7 +70,7 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
         </SectionCard>
 
         <PrimaryButton label="Next: Shipment details" onPress={next} />
-        <ShipmentSummaryCard draft={draft} />
+        <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>
   );

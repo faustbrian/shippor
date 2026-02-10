@@ -4,13 +4,15 @@ import { AppScreen, Heading, PrimaryButton, SectionCard, SecondaryButton } from 
 import { useAppStore, useCartTotals } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SendStepHeader } from '../../components/SendStepHeader';
-import { ShipmentSummaryCard } from '../../components/ShipmentSummaryCard';
+import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendCart'>;
 
 export function SendCartScreen({ navigation }: Props) {
   const draft = useAppStore((state) => state.currentDraft);
   const cart = useAppStore((state) => state.cart);
+  const selectedPaymentMethod = useAppStore((state) => state.selectedPaymentMethod);
+  const agreeToTerms = useAppStore((state) => state.agreeToTerms);
   const addDraftToCart = useAppStore((state) => state.addDraftToCart);
   const removeCartItem = useAppStore((state) => state.removeCartItem);
   const totals = useCartTotals();
@@ -51,10 +53,19 @@ export function SendCartScreen({ navigation }: Props) {
           <Text>Fee: ${totals.fee.toFixed(2)}</Text>
           <Text style={{ fontWeight: '700' }}>Total: ${totals.total.toFixed(2)}</Text>
         </SectionCard>
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Cart status</Text>
+          <Text>Selected payment: {selectedPaymentMethod || 'Not selected'}</Text>
+          <Text>Agreed to terms: {agreeToTerms ? 'Yes' : 'No'}</Text>
+          <Text style={{ color: '#667085' }}>
+            Continue to payment to confirm gateway selection and submit all
+            shipments.
+          </Text>
+        </SectionCard>
 
         <PrimaryButton label="Continue to payment" onPress={() => navigation.navigate('SendPayment')} disabled={!cart.length} />
         <SecondaryButton label="Back to methods" onPress={() => navigation.navigate('SendMethods')} />
-        <ShipmentSummaryCard draft={draft} />
+        <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>
   );

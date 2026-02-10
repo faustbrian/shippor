@@ -3,9 +3,9 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard, ui } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
-import { ShipmentSummaryCard } from '../../components/ShipmentSummaryCard';
 import { RecentShipmentsPanel } from '../../components/RecentShipmentsPanel';
 import { QuickAddParcelsCard } from '../../components/QuickAddParcelsCard';
+import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { validateStepBasic } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
@@ -176,7 +176,7 @@ export function SendBasicScreen({ navigation }: Props) {
         <QuickAddParcelsCard draft={draft} onApply={setDraft} />
 
         <PrimaryButton label="Next: Address details" onPress={next} />
-        <ShipmentSummaryCard draft={draft} />
+        <ShippingFlowSidePanel draft={draft} />
         <View style={{ height: 40 }} />
       </ScrollView>
     </AppScreen>

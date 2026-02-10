@@ -48,6 +48,7 @@ interface AppState {
   selectedPaymentMethod: string;
   agreeToTerms: boolean;
   checkoutError: string | null;
+  checkoutFlowState: 'not-started' | 'pending' | 'failed-payment' | 'paid' | 'shipped';
   lastCheckoutShipments: ShipmentRecord[];
 
   login: (email: string, password: string) => Promise<void>;
@@ -108,6 +109,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedPaymentMethod: '',
   agreeToTerms: false,
   checkoutError: null,
+  checkoutFlowState: 'not-started',
   lastCheckoutShipments: [],
 
   async login(email, password) {
@@ -149,6 +151,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       selectedPaymentMethod: '',
       agreeToTerms: false,
       checkoutError: null,
+      checkoutFlowState: 'not-started',
       lastCheckoutShipments: [],
       currentDraft: createNewDraft(),
       authMessage: null,
@@ -300,25 +303,27 @@ export const useAppStore = create<AppState>((set, get) => ({
   async submitCart() {
     const { cart, selectedPaymentMethod, agreeToTerms } = get();
     if (!cart.length) {
-      set({ checkoutError: 'Cart is empty' });
+      set({ checkoutError: 'Cart is empty', checkoutFlowState: 'failed-payment' });
       return false;
     }
 
     if (!selectedPaymentMethod) {
-      set({ checkoutError: 'Select a payment method' });
+      set({ checkoutError: 'Select a payment method', checkoutFlowState: 'failed-payment' });
       return false;
     }
 
     if (!agreeToTerms) {
-      set({ checkoutError: 'You must agree to terms before payment' });
+      set({ checkoutError: 'You must agree to terms before payment', checkoutFlowState: 'failed-payment' });
       return false;
     }
 
-    set({ isBusy: true, checkoutError: null });
+    set({ isBusy: true, checkoutError: null, checkoutFlowState: 'pending' });
     const created: ShipmentRecord[] = [];
     for (const item of cart) {
       created.push(await createShipmentFromDraft(item.draft));
     }
+
+    set({ checkoutFlowState: 'paid' });
 
     const [dashboard, nextShipments, tracking] = await Promise.all([
       fetchDashboard(),
@@ -339,6 +344,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       currentDraft: createNewDraft(),
       shippingMethods: [],
       pickupLocations: [],
+      checkoutFlowState: 'shipped',
     });
     return true;
   },

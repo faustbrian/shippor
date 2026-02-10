@@ -1,6 +1,6 @@
 import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppScreen, Heading, PrimaryButton, SectionCard } from '../../components/ui';
+import { AppScreen, Heading, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
@@ -26,6 +26,8 @@ export function SendThankYouScreen({ navigation }: Props) {
           <Text>Transport label PDF: available (stub)</Text>
           <Text>Receipt PDF: available (stub)</Text>
           <Text>Proforma invoice: conditional (stub)</Text>
+          <SecondaryButton label="Download transport label" onPress={() => {}} />
+          <SecondaryButton label="Download receipt" onPress={() => {}} />
         </SectionCard>
 
         {shipments.map((shipment) => (

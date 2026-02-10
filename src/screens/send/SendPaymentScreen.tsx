@@ -2,7 +2,8 @@ import { ScrollView, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, Heading, Label, PrimaryButton, SectionCard } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
-import { ShipmentSummaryCard } from '../../components/ShipmentSummaryCard';
+import { PaymentMethodCard } from '../../components/PaymentMethodCard';
+import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { useAppStore, useCartTotals } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 
@@ -19,6 +20,7 @@ export function SendPaymentScreen({ navigation }: Props) {
   const selectedPaymentMethod = useAppStore((state) => state.selectedPaymentMethod);
   const agreeToTerms = useAppStore((state) => state.agreeToTerms);
   const checkoutError = useAppStore((state) => state.checkoutError);
+  const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
   const setSelectedPaymentMethod = useAppStore((state) => state.setSelectedPaymentMethod);
   const setAgreeToTerms = useAppStore((state) => state.setAgreeToTerms);
   const submitCart = useAppStore((state) => state.submitCart);
@@ -42,10 +44,12 @@ export function SendPaymentScreen({ navigation }: Props) {
           <Text style={{ fontWeight: '700' }}>Payment method</Text>
           <View style={{ gap: 8 }}>
             {paymentOptions.map((option) => (
-              <PrimaryButton
+              <PaymentMethodCard
                 key={option.id}
-                label={`${selectedPaymentMethod === option.id ? 'Selected: ' : ''}${option.label}`}
-                onPress={() => setSelectedPaymentMethod(option.id)}
+                id={option.id}
+                label={option.label}
+                selected={selectedPaymentMethod === option.id}
+                onSelect={() => setSelectedPaymentMethod(option.id)}
               />
             ))}
           </View>
@@ -62,6 +66,12 @@ export function SendPaymentScreen({ navigation }: Props) {
             <Switch value={agreeToTerms} onValueChange={setAgreeToTerms} />
           </View>
         </SectionCard>
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Payment status</Text>
+          <Text>{selectedPaymentMethod ? 'Ready for payment' : 'Select method to continue'}</Text>
+          <Text>{agreeToTerms ? 'Terms accepted' : 'Terms not accepted'}</Text>
+          <Text>Flow state: {checkoutFlowState}</Text>
+        </SectionCard>
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Checkout totals</Text>
@@ -71,7 +81,7 @@ export function SendPaymentScreen({ navigation }: Props) {
           <Text style={{ fontWeight: '700' }}>Total: ${totals.total.toFixed(2)}</Text>
         </SectionCard>
 
-        {cart[0]?.draft ? <ShipmentSummaryCard draft={cart[0].draft} /> : null}
+        {cart[0]?.draft ? <ShippingFlowSidePanel draft={cart[0].draft} /> : null}
 
         <ErrorText text={checkoutError ?? undefined} />
         <PrimaryButton label="Pay & Send" onPress={submit} loading={isBusy} disabled={!cart.length} />

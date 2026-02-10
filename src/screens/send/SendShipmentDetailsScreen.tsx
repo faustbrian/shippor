@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard, ui } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
-import { ShipmentSummaryCard } from '../../components/ShipmentSummaryCard';
+import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { validateStepShipmentDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
@@ -142,12 +142,51 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
             </View>
           ) : null}
         </SectionCard>
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Additional services</Text>
+          <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Fragile</Text>
+            <Switch
+              value={Boolean(draft.addons.fragile)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, fragile: value } })
+              }
+            />
+          </View>
+          <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Dangerous goods</Text>
+            <Switch
+              value={Boolean(draft.addons.dangerous)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, dangerous: value } })
+              }
+            />
+          </View>
+          <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Proof of delivery</Text>
+            <Switch
+              value={Boolean(draft.addons.proofOfDelivery)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, proofOfDelivery: value } })
+              }
+            />
+          </View>
+          <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Call before delivery</Text>
+            <Switch
+              value={Boolean(draft.addons.callBeforeDelivery)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, callBeforeDelivery: value } })
+              }
+            />
+          </View>
+        </SectionCard>
 
         <Pressable onPress={() => navigation.goBack()}>
           <Text>Back</Text>
         </Pressable>
         <PrimaryButton label="Next: Methods" onPress={next} />
-        <ShipmentSummaryCard draft={draft} />
+        <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>
   );

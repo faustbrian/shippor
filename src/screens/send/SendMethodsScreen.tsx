@@ -3,10 +3,12 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppScreen, ErrorText, Heading, Label, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
 import { SendStepHeader } from '../../components/SendStepHeader';
-import { ShipmentSummaryCard } from '../../components/ShipmentSummaryCard';
 import { filterShippingMethodsByType, getShippingMethodValidationErrors } from '../../domain/shippingMethods';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
+import { ShippingMethodCard } from '../../components/ShippingMethodCard';
+import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
+import { ShippingMethodInstructionsPanel } from '../../components/ShippingMethodInstructionsPanel';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendMethods'>;
 
@@ -81,32 +83,32 @@ export function SendMethodsScreen({ navigation }: Props) {
         </SectionCard>
 
         {visibleMethods.map((method) => (
-          <Pressable
+          <ShippingMethodCard
             key={method.id}
-            onPress={() => {
+            method={method}
+            isPickup={method.isPickupLocationMethod}
+            selected={draft.selectedMethod?.id === method.id}
+            onSelect={() => {
               setDraft({ ...draft, selectedMethod: method, pickupLocationId: null });
               setShippingMethodError(undefined);
               setPickupError(undefined);
             }}
-            style={{
-              borderWidth: 1,
-              borderColor: draft.selectedMethod?.id === method.id ? '#0A66FF' : '#D0D5DD',
-              borderRadius: 12,
-              padding: 12,
-              marginBottom: 8,
-              backgroundColor: '#fff',
+            onConfirm={() => {
+              setDraft({ ...draft, selectedMethod: method });
+              if (method.isPickupLocationMethod && !draft.pickupLocationId) {
+                setPickupError('Select pickup point address');
+                return;
+              }
+              navigation.navigate('SendCart');
             }}
-          >
-            <Text style={{ fontWeight: '700' }}>{method.label}</Text>
-            <Text>{method.carrier} - {method.eta}</Text>
-            <Text>${method.price.toFixed(2)}</Text>
-          </Pressable>
+          />
         ))}
 
         <SectionCard>
           <Text>Selected: {draft.selectedMethod?.label ?? 'None'}</Text>
           <ErrorText text={shippingMethodError} />
         </SectionCard>
+        <ShippingMethodInstructionsPanel method={draft.selectedMethod} />
 
         {draft.selectedMethod?.isPickupLocationMethod ? (
           <SectionCard>
@@ -149,7 +151,7 @@ export function SendMethodsScreen({ navigation }: Props) {
             }
           }}
         />
-        <ShipmentSummaryCard draft={draft} />
+        <ShippingFlowSidePanel draft={draft} />
       </ScrollView>
     </AppScreen>
   );

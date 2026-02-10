@@ -67,6 +67,11 @@ export function createEmptyShipmentDraft(): ShipmentDraft {
     pickupLocationId: null,
     addons: {
       cashOnDelivery: false,
+      dangerous: false,
+      fragile: false,
+      proofOfDelivery: false,
+      callBeforeDelivery: false,
+      oversize: false,
     },
     cashOnDelivery: {
       amount: '',
