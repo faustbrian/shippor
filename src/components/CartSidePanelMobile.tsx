@@ -3,6 +3,7 @@ import { SectionCard } from './ui';
 
 export function CartSidePanelMobile({
   itemsCount,
+  failedItemsCount,
   subtotal,
   fee,
   total,
@@ -10,6 +11,7 @@ export function CartSidePanelMobile({
   selectedPayment,
 }: {
   itemsCount: number;
+  failedItemsCount: number;
   subtotal: number;
   fee: number;
   total: number;
@@ -20,6 +22,7 @@ export function CartSidePanelMobile({
     <SectionCard>
       <Text style={{ fontWeight: '800' }}>Cart Side Panel</Text>
       <Text>Items in cart: {itemsCount}</Text>
+      <Text>Failed items: {failedItemsCount}</Text>
       <Text>State: {state}</Text>
       <Text>Payment: {selectedPayment || 'Not selected'}</Text>
       <Text style={{ marginTop: 6, fontWeight: '700' }}>Totals</Text>

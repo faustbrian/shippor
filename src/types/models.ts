@@ -116,4 +116,5 @@ export interface CartItem {
   title: string;
   price: number;
   draft: ShipmentDraft;
+  state: 'added' | 'failed-shipment-can-retry' | 'shipped';
 }

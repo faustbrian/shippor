@@ -30,6 +30,7 @@ export function SendPaymentScreen({ navigation }: Props) {
   const submitCart = useAppStore((state) => state.submitCart);
   const isBusy = useAppStore((state) => state.isBusy);
   const totals = useCartTotals();
+  const failedItemsCount = cart.filter((item) => item.state === 'failed-shipment-can-retry').length;
 
   const submit = async () => {
     const ok = await submitCart();
@@ -97,6 +98,7 @@ export function SendPaymentScreen({ navigation }: Props) {
         </SectionCard>
         <CartSidePanelMobile
           itemsCount={cart.length}
+          failedItemsCount={failedItemsCount}
           subtotal={totals.subtotal}
           fee={totals.fee}
           total={totals.total}

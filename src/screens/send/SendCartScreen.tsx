@@ -20,6 +20,7 @@ export function SendCartScreen({ navigation }: Props) {
   const addDraftToCart = useAppStore((state) => state.addDraftToCart);
   const removeCartItem = useAppStore((state) => state.removeCartItem);
   const totals = useCartTotals();
+  const failedItemsCount = cart.filter((item) => item.state === 'failed-shipment-can-retry').length;
 
   return (
     <AppScreen>
@@ -51,6 +52,14 @@ export function SendCartScreen({ navigation }: Props) {
                 <Text style={{ fontWeight: '700' }}>{item.title}</Text>
                 <Text>{item.draft.selectedMethod?.label}</Text>
                 <Text>${item.price.toFixed(2)}</Text>
+                <Text
+                  style={{
+                    color: item.state === 'failed-shipment-can-retry' ? '#D92D20' : '#027A48',
+                    fontWeight: '700',
+                  }}
+                >
+                  {item.state}
+                </Text>
                 {cartItemErrors[item.id] ? (
                   <Text style={{ color: '#D92D20' }}>{cartItemErrors[item.id]}</Text>
                 ) : null}
@@ -64,6 +73,7 @@ export function SendCartScreen({ navigation }: Props) {
 
         <CartSidePanelMobile
           itemsCount={cart.length}
+          failedItemsCount={failedItemsCount}
           subtotal={totals.subtotal}
           fee={totals.fee}
           total={totals.total}

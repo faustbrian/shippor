@@ -90,6 +90,7 @@ function draftToCartItem(draft: ShipmentDraft): CartItem {
     title: `${draft.senderAddress.city || 'Sender'} -> ${draft.recipientAddress.city || 'Recipient'}`,
     price: method?.price ?? 0,
     draft: JSON.parse(JSON.stringify(draft)) as ShipmentDraft,
+    state: 'added',
   };
 }
 
@@ -351,7 +352,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     for (const item of cart) {
       // Stubbed shipment-controller partial failures for parity testing.
       if (item.draft.addons.dangerous) {
-        failedItems.push(item);
+        failedItems.push({
+          ...item,
+          state: 'failed-shipment-can-retry',
+        });
         nextItemErrors[item.id] = 'Dangerous goods shipment failed. Review details and retry.';
         continue;
       }
