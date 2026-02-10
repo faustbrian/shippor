@@ -207,12 +207,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateAddressField(role, field, value) {
     set((state) => {
       const target = role === 'sender' ? 'senderAddress' : 'recipientAddress';
+      const normalizedValue =
+        field === 'phone'
+          ? value.replace(/\s+/g, '').replace(/(?!^)\+/g, '')
+          : value;
       return {
         currentDraft: {
           ...state.currentDraft,
           [target]: {
             ...state.currentDraft[target],
-            [field]: value,
+            [field]: normalizedValue,
           },
         },
       };

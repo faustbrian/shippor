@@ -21,6 +21,64 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
   const isBusy = useAppStore((state) => state.isBusy);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepShipmentDetails> | null>(null);
 
+  const updateItem = (
+    index: number,
+    field: 'description' | 'countryOfOrigin' | 'hsTariffCode' | 'quantity' | 'quantityUnit' | 'weight' | 'value',
+    value: string | number | null,
+  ) => {
+    setDraft({
+      ...draft,
+      items: draft.items.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    });
+  };
+
+  const addBlankItem = () => {
+    const index = draft.items.length;
+    setDraft({
+      ...draft,
+      items: [
+        ...draft.items,
+        {
+          id: `quick-item-${index + 1}`,
+          description: '',
+          countryOfOrigin: draft.senderAddress.country || 'US',
+          hsTariffCode: '',
+          quantity: null,
+          quantityUnit: 'pcs',
+          weight: null,
+          value: null,
+        },
+      ],
+    });
+  };
+
+  const addQuickItem = () => {
+    const index = draft.items.length;
+    setDraft({
+      ...draft,
+      items: [
+        ...draft.items,
+        {
+          id: `quick-item-${index + 1}`,
+          description: 'T-shirt',
+          countryOfOrigin: draft.senderAddress.country || 'US',
+          hsTariffCode: '6109',
+          quantity: 1,
+          quantityUnit: 'pcs',
+          weight: 0.3,
+          value: 20,
+        },
+      ],
+    });
+  };
+
+  const removeItem = (index: number) => {
+    setDraft({
+      ...draft,
+      items: draft.items.filter((_, i) => i !== index),
+    });
+  };
+
   useEffect(() => {
     if (hasQuickHomeErrors(draft)) {
       navigation.replace('SendQuickStart');
@@ -74,9 +132,50 @@ export function SendQuickShipmentDetailsScreen({ navigation }: Props) {
           </View>
           <ErrorText text={errors?.createCommerceProformaInvoice} />
           {draft.createCommerceProformaInvoice ? (
-            <Text style={{ color: '#667085' }}>
-              Full itemized invoice editor is available in the full send flow.
-            </Text>
+            <View style={{ gap: 6 }}>
+              <PrimaryButton label="Add empty item row" onPress={addBlankItem} />
+              <SecondaryButton label="Quick add item" onPress={addQuickItem} />
+              {draft.items.map((item, index) => (
+                <View key={item.id} style={{ borderWidth: 1, borderColor: '#EAECF0', borderRadius: 10, padding: 10, gap: 6 }}>
+                  <Text style={{ fontWeight: '700' }}>Item #{index + 1}</Text>
+                  <Label>Description</Label>
+                  <FieldInput value={item.description} onChangeText={(v) => updateItem(index, 'description', v)} />
+                  <Label>Country of origin</Label>
+                  <FieldInput value={item.countryOfOrigin} onChangeText={(v) => updateItem(index, 'countryOfOrigin', v)} autoCapitalize="characters" />
+                  <Label>HS tariff code</Label>
+                  <FieldInput value={item.hsTariffCode} onChangeText={(v) => updateItem(index, 'hsTariffCode', v)} />
+                  <Label>Quantity</Label>
+                  <FieldInput
+                    value={item.quantity ? String(item.quantity) : ''}
+                    keyboardType="numeric"
+                    onChangeText={(v) => updateItem(index, 'quantity', v ? Number(v) : null)}
+                  />
+                  <Label>Quantity unit</Label>
+                  <FieldInput value={item.quantityUnit ?? ''} onChangeText={(v) => updateItem(index, 'quantityUnit', v)} />
+                  <Label>Weight</Label>
+                  <FieldInput
+                    value={item.weight ? String(item.weight) : ''}
+                    keyboardType="numeric"
+                    onChangeText={(v) => updateItem(index, 'weight', v ? Number(v) : null)}
+                  />
+                  <Label>Value</Label>
+                  <FieldInput
+                    value={item.value ? String(item.value) : ''}
+                    keyboardType="numeric"
+                    onChangeText={(v) => updateItem(index, 'value', v ? Number(v) : null)}
+                  />
+                  <ErrorText text={errors?.items?.[item.id]} />
+                  <SecondaryButton label="Remove item" onPress={() => removeItem(index)} />
+                </View>
+              ))}
+              <ErrorText text={errors?.items?.shipmentItems} />
+              <Text style={{ color: '#667085' }}>
+                Items total value: {draft.items.reduce((sum, item) => sum + (item.value ?? 0), 0).toFixed(2)}
+              </Text>
+              <Text style={{ color: '#667085' }}>
+                Items total weight: {draft.items.reduce((sum, item) => sum + (item.weight ?? 0), 0).toFixed(2)} kg
+              </Text>
+            </View>
           ) : null}
         </SectionCard>
 
