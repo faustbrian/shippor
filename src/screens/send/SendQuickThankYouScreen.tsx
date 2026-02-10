@@ -13,9 +13,13 @@ export function SendQuickThankYouScreen({ navigation }: Props) {
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
 
   useEffect(() => {
+    if (!shipments.length) {
+      navigation.replace('SendQuickStart');
+      return;
+    }
     const timer = setTimeout(() => setIsLoadingDocs(false), 1200);
     return () => clearTimeout(timer);
-  }, []);
+  }, [navigation, shipments.length]);
 
   return (
     <AppScreen>

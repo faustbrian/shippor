@@ -19,6 +19,8 @@ import { SendBasicScreen } from '../screens/send/SendBasicScreen';
 import { SendCartScreen } from '../screens/send/SendCartScreen';
 import { SendMethodsScreen } from '../screens/send/SendMethodsScreen';
 import { SendPaymentScreen } from '../screens/send/SendPaymentScreen';
+import { SendQuickAddressDetailsScreen } from '../screens/send/SendQuickAddressDetailsScreen';
+import { SendQuickShipmentDetailsScreen } from '../screens/send/SendQuickShipmentDetailsScreen';
 import { SendQuickStartScreen } from '../screens/send/SendQuickStartScreen';
 import { SendQuickThankYouScreen } from '../screens/send/SendQuickThankYouScreen';
 import { SendShipmentDetailsScreen } from '../screens/send/SendShipmentDetailsScreen';
@@ -46,6 +48,8 @@ function SendNavigator() {
     <SendStack.Navigator>
       <SendStack.Screen name="SendBasic" component={SendBasicScreen} options={{ title: 'Send' }} />
       <SendStack.Screen name="SendQuickStart" component={SendQuickStartScreen} options={{ title: 'Quick Send' }} />
+      <SendStack.Screen name="SendQuickAddressDetails" component={SendQuickAddressDetailsScreen} options={{ title: 'Quick Address details' }} />
+      <SendStack.Screen name="SendQuickShipmentDetails" component={SendQuickShipmentDetailsScreen} options={{ title: 'Quick Shipment details' }} />
       <SendStack.Screen name="SendQuickThankYou" component={SendQuickThankYouScreen} options={{ title: 'Quick Thank You' }} />
       <SendStack.Screen name="SendAddressDetails" component={SendAddressDetailsScreen} options={{ title: 'Address details' }} />
       <SendStack.Screen name="SendShipmentDetails" component={SendShipmentDetailsScreen} options={{ title: 'Shipment details' }} />
