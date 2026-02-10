@@ -18,6 +18,7 @@ import {
 } from '../api/mockApi';
 import { calculateCartTotals } from '../domain/cart';
 import { defaultSelectedPickupLocations, filterShippingMethodsByType } from '../domain/shippingMethods';
+import { normalizePhoneForCountry } from '../utils/addressRules';
 import type {
   Address,
   AddressRole,
@@ -207,10 +208,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateAddressField(role, field, value) {
     set((state) => {
       const target = role === 'sender' ? 'senderAddress' : 'recipientAddress';
-      const normalizedValue =
-        field === 'phone'
-          ? value.replace(/\s+/g, '').replace(/(?!^)\+/g, '')
-          : value;
+      const address = state.currentDraft[target];
+      const normalizedValue = field === 'phone' ? normalizePhoneForCountry(value, address.country) : value;
       return {
         currentDraft: {
           ...state.currentDraft,

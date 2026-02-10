@@ -7,6 +7,7 @@ import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { validateStepAddressDetails } from '../../domain/shipmentValidation';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
+import { showAddressLine2Field, showPostalCodeField, showStateField } from '../../utils/addressRules';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendAddressDetails'>;
 
@@ -16,6 +17,12 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
   const updateAddressField = useAppStore((state) => state.updateAddressField);
   const [errors, setErrors] = useState<ReturnType<typeof validateStepAddressDetails> | null>(null);
   const isInternational = draft.senderAddress.country !== draft.recipientAddress.country;
+  const showSenderState = showStateField(draft.senderAddress.country);
+  const showRecipientState = showStateField(draft.recipientAddress.country);
+  const showSenderPostal = showPostalCodeField(draft.senderAddress.country);
+  const showRecipientPostal = showPostalCodeField(draft.recipientAddress.country);
+  const showSenderAddressLine2 = showAddressLine2Field(draft.senderAddress.country);
+  const showRecipientAddressLine2 = showAddressLine2Field(draft.recipientAddress.country);
 
   const next = () => {
     const result = validateStepAddressDetails(draft);
@@ -39,34 +46,54 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
               <Label>Organization</Label>
               <FieldInput value={draft.senderAddress.organization ?? ''} onChangeText={(v) => updateAddressField('sender', 'organization', v)} />
               <ErrorText text={errors?.senderAddress?.organization} />
+              <Label>Payer relation</Label>
+              <FieldInput value={draft.senderAddress.payerRelation ?? ''} onChangeText={(v) => updateAddressField('sender', 'payerRelation', v)} placeholder="sender, recipient, third-party" />
             </>
           ) : (
             <>
               <Label>Name</Label>
               <FieldInput value={draft.senderAddress.name} onChangeText={(v) => updateAddressField('sender', 'name', v)} />
               <ErrorText text={errors?.senderAddress?.name} />
+              {draft.senderAddress.country === 'US' ? (
+                <>
+                  <Label>Social security number</Label>
+                  <FieldInput value={draft.senderAddress.socialSecurityNumber ?? ''} onChangeText={(v) => updateAddressField('sender', 'socialSecurityNumber', v)} />
+                </>
+              ) : null}
             </>
           )}
           <Label>Email</Label>
           <FieldInput value={draft.senderAddress.email} onChangeText={(v) => updateAddressField('sender', 'email', v)} autoCapitalize="none" />
           <ErrorText text={errors?.senderAddress?.email} />
           <Label>Phone</Label>
-          <FieldInput value={draft.senderAddress.phone} onChangeText={(v) => updateAddressField('sender', 'phone', v)} />
+          <FieldInput value={draft.senderAddress.phone} onChangeText={(v) => updateAddressField('sender', 'phone', v)} placeholder="+15551234567" />
           <ErrorText text={errors?.senderAddress?.phone} />
           <Label>Street</Label>
           <FieldInput value={draft.senderAddress.street} onChangeText={(v) => updateAddressField('sender', 'street', v)} />
           <ErrorText text={errors?.senderAddress?.street} />
-          <Label>Street line 2</Label>
-          <FieldInput value={draft.senderAddress.street2 ?? ''} onChangeText={(v) => updateAddressField('sender', 'street2', v)} />
+          {showSenderAddressLine2 ? (
+            <>
+              <Label>Street line 2</Label>
+              <FieldInput value={draft.senderAddress.street2 ?? ''} onChangeText={(v) => updateAddressField('sender', 'street2', v)} />
+            </>
+          ) : null}
           <Label>City</Label>
           <FieldInput value={draft.senderAddress.city} onChangeText={(v) => updateAddressField('sender', 'city', v)} />
           <ErrorText text={errors?.senderAddress?.city} />
-          <Label>State / Region</Label>
-          <FieldInput value={draft.senderAddress.state ?? ''} onChangeText={(v) => updateAddressField('sender', 'state', v)} />
-          <ErrorText text={errors?.senderAddress?.state} />
-          <Label>Postal code</Label>
-          <FieldInput value={draft.senderAddress.postalCode} onChangeText={(v) => updateAddressField('sender', 'postalCode', v)} />
-          <ErrorText text={errors?.senderAddress?.postalCode} />
+          {showSenderState ? (
+            <>
+              <Label>State / Region</Label>
+              <FieldInput value={draft.senderAddress.state ?? ''} onChangeText={(v) => updateAddressField('sender', 'state', v)} />
+              <ErrorText text={errors?.senderAddress?.state} />
+            </>
+          ) : null}
+          {showSenderPostal ? (
+            <>
+              <Label>Postal code</Label>
+              <FieldInput value={draft.senderAddress.postalCode} onChangeText={(v) => updateAddressField('sender', 'postalCode', v)} />
+              <ErrorText text={errors?.senderAddress?.postalCode} />
+            </>
+          ) : null}
           <Label>Country</Label>
           <FieldInput value={draft.senderAddress.country} onChangeText={(v) => updateAddressField('sender', 'country', v)} autoCapitalize="characters" />
           <ErrorText text={errors?.senderAddress?.country} />
@@ -82,6 +109,12 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
               <Label>EORI</Label>
               <FieldInput value={draft.senderAddress.eori ?? ''} onChangeText={(v) => updateAddressField('sender', 'eori', v)} />
               <ErrorText text={errors?.senderAddress?.eori} />
+              {draft.senderAddress.country === 'US' ? (
+                <>
+                  <Label>Employer identification number</Label>
+                  <FieldInput value={draft.senderAddress.employerIdentificationNumber ?? ''} onChangeText={(v) => updateAddressField('sender', 'employerIdentificationNumber', v)} />
+                </>
+              ) : null}
             </>
           ) : null}
         </SectionCard>
@@ -99,28 +132,46 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
               <Label>Name</Label>
               <FieldInput value={draft.recipientAddress.name} onChangeText={(v) => updateAddressField('recipient', 'name', v)} />
               <ErrorText text={errors?.recipientAddress?.name} />
+              {draft.recipientAddress.country === 'US' ? (
+                <>
+                  <Label>Social security number</Label>
+                  <FieldInput value={draft.recipientAddress.socialSecurityNumber ?? ''} onChangeText={(v) => updateAddressField('recipient', 'socialSecurityNumber', v)} />
+                </>
+              ) : null}
             </>
           )}
           <Label>Email</Label>
           <FieldInput value={draft.recipientAddress.email} onChangeText={(v) => updateAddressField('recipient', 'email', v)} autoCapitalize="none" />
           <ErrorText text={errors?.recipientAddress?.email} />
           <Label>Phone</Label>
-          <FieldInput value={draft.recipientAddress.phone} onChangeText={(v) => updateAddressField('recipient', 'phone', v)} />
+          <FieldInput value={draft.recipientAddress.phone} onChangeText={(v) => updateAddressField('recipient', 'phone', v)} placeholder="+15551234567" />
           <ErrorText text={errors?.recipientAddress?.phone} />
           <Label>Street</Label>
           <FieldInput value={draft.recipientAddress.street} onChangeText={(v) => updateAddressField('recipient', 'street', v)} />
           <ErrorText text={errors?.recipientAddress?.street} />
-          <Label>Street line 2</Label>
-          <FieldInput value={draft.recipientAddress.street2 ?? ''} onChangeText={(v) => updateAddressField('recipient', 'street2', v)} />
+          {showRecipientAddressLine2 ? (
+            <>
+              <Label>Street line 2</Label>
+              <FieldInput value={draft.recipientAddress.street2 ?? ''} onChangeText={(v) => updateAddressField('recipient', 'street2', v)} />
+            </>
+          ) : null}
           <Label>City</Label>
           <FieldInput value={draft.recipientAddress.city} onChangeText={(v) => updateAddressField('recipient', 'city', v)} />
           <ErrorText text={errors?.recipientAddress?.city} />
-          <Label>State / Region</Label>
-          <FieldInput value={draft.recipientAddress.state ?? ''} onChangeText={(v) => updateAddressField('recipient', 'state', v)} />
-          <ErrorText text={errors?.recipientAddress?.state} />
-          <Label>Postal code</Label>
-          <FieldInput value={draft.recipientAddress.postalCode} onChangeText={(v) => updateAddressField('recipient', 'postalCode', v)} />
-          <ErrorText text={errors?.recipientAddress?.postalCode} />
+          {showRecipientState ? (
+            <>
+              <Label>State / Region</Label>
+              <FieldInput value={draft.recipientAddress.state ?? ''} onChangeText={(v) => updateAddressField('recipient', 'state', v)} />
+              <ErrorText text={errors?.recipientAddress?.state} />
+            </>
+          ) : null}
+          {showRecipientPostal ? (
+            <>
+              <Label>Postal code</Label>
+              <FieldInput value={draft.recipientAddress.postalCode} onChangeText={(v) => updateAddressField('recipient', 'postalCode', v)} />
+              <ErrorText text={errors?.recipientAddress?.postalCode} />
+            </>
+          ) : null}
           <Label>Country</Label>
           <FieldInput value={draft.recipientAddress.country} onChangeText={(v) => updateAddressField('recipient', 'country', v)} autoCapitalize="characters" />
           <ErrorText text={errors?.recipientAddress?.country} />
@@ -136,6 +187,12 @@ export function SendAddressDetailsScreen({ navigation }: Props) {
               <Label>EORI</Label>
               <FieldInput value={draft.recipientAddress.eori ?? ''} onChangeText={(v) => updateAddressField('recipient', 'eori', v)} />
               <ErrorText text={errors?.recipientAddress?.eori} />
+              {draft.recipientAddress.country === 'US' ? (
+                <>
+                  <Label>Employer identification number</Label>
+                  <FieldInput value={draft.recipientAddress.employerIdentificationNumber ?? ''} onChangeText={(v) => updateAddressField('recipient', 'employerIdentificationNumber', v)} />
+                </>
+              ) : null}
             </>
           ) : null}
         </SectionCard>

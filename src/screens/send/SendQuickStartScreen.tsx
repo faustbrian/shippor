@@ -1,7 +1,7 @@
 import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
-import { AppScreen, FieldInput, Heading, Label, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
+import { AppScreen, ErrorText, FieldInput, Heading, Label, PrimaryButton, SectionCard, SecondaryButton } from '../../components/ui';
 import { useAppStore } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SendStepHeader } from '../../components/SendStepHeader';
@@ -28,6 +28,7 @@ export function SendQuickStartScreen({ navigation }: Props) {
   const [recipientSuggestions, setRecipientSuggestions] = useState<Address[]>([]);
   const [quickSearchWarning, setQuickSearchWarning] = useState('');
   const [quickHomeError, setQuickHomeError] = useState('');
+  const [typeErrors, setTypeErrors] = useState<{ senderType?: string; recipientType?: string }>({});
 
   useEffect(() => {
     void loadShippingMethods();
@@ -94,6 +95,10 @@ export function SendQuickStartScreen({ navigation }: Props) {
       Object.keys(basic.parcels).length > 0;
     if (hasBasicErrors || method.shippingMethod) {
       setQuickHomeError('Complete addresses, parcel details, and shipping method to continue.');
+      setTypeErrors({
+        senderType: basic.senderAddress.type,
+        recipientType: basic.recipientAddress.type,
+      });
       return;
     }
 
@@ -152,6 +157,11 @@ export function SendQuickStartScreen({ navigation }: Props) {
           ))}
           <Label>Sender name</Label>
           <FieldInput value={draft.senderAddress.name} onChangeText={(v) => updateAddressField('sender', 'name', v)} />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <SecondaryButton label="Sender private" onPress={() => updateAddressField('sender', 'type', 'private')} />
+            <SecondaryButton label="Sender business" onPress={() => updateAddressField('sender', 'type', 'business')} />
+          </View>
+          <ErrorText text={typeErrors.senderType} />
           <Label>Sender city</Label>
           <FieldInput value={draft.senderAddress.city} onChangeText={(v) => updateAddressField('sender', 'city', v)} />
           {(() => {
@@ -197,6 +207,11 @@ export function SendQuickStartScreen({ navigation }: Props) {
           ))}
           <Label>Recipient name</Label>
           <FieldInput value={draft.recipientAddress.name} onChangeText={(v) => updateAddressField('recipient', 'name', v)} />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <SecondaryButton label="Recipient private" onPress={() => updateAddressField('recipient', 'type', 'private')} />
+            <SecondaryButton label="Recipient business" onPress={() => updateAddressField('recipient', 'type', 'business')} />
+          </View>
+          <ErrorText text={typeErrors.recipientType} />
           <Label>Recipient city</Label>
           <FieldInput value={draft.recipientAddress.city} onChangeText={(v) => updateAddressField('recipient', 'city', v)} />
           {quickSearchWarning ? <Text style={{ color: '#D92D20' }}>{quickSearchWarning}</Text> : null}
@@ -232,6 +247,50 @@ export function SendQuickStartScreen({ navigation }: Props) {
               }
             />
           </View>
+          <Label>Weight (kg)</Label>
+          <FieldInput
+            value={draft.parcels[0].weight ? String(draft.parcels[0].weight) : ''}
+            keyboardType="numeric"
+            onChangeText={(v) =>
+              setDraft({
+                ...draft,
+                parcels: [{ ...draft.parcels[0], weight: v ? Number(v) : null }],
+              })
+            }
+          />
+          <Label>Width (cm)</Label>
+          <FieldInput
+            value={draft.parcels[0].width ? String(draft.parcels[0].width) : ''}
+            keyboardType="numeric"
+            onChangeText={(v) =>
+              setDraft({
+                ...draft,
+                parcels: [{ ...draft.parcels[0], width: v ? Number(v) : null }],
+              })
+            }
+          />
+          <Label>Height (cm)</Label>
+          <FieldInput
+            value={draft.parcels[0].height ? String(draft.parcels[0].height) : ''}
+            keyboardType="numeric"
+            onChangeText={(v) =>
+              setDraft({
+                ...draft,
+                parcels: [{ ...draft.parcels[0], height: v ? Number(v) : null }],
+              })
+            }
+          />
+          <Label>Length (cm)</Label>
+          <FieldInput
+            value={draft.parcels[0].length ? String(draft.parcels[0].length) : ''}
+            keyboardType="numeric"
+            onChangeText={(v) =>
+              setDraft({
+                ...draft,
+                parcels: [{ ...draft.parcels[0], length: v ? Number(v) : null }],
+              })
+            }
+          />
         </SectionCard>
 
         <SectionCard>

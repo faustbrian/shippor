@@ -3,6 +3,8 @@ export interface CountryMeta {
   vatExemptEu: string[];
   mandatoryPostalCodes: string[];
   stateRequired: string[];
+  hidePostalCodes: string[];
+  hideAddressLine2: string[];
   hideQuickSearch: string[];
 }
 
@@ -15,5 +17,7 @@ export const countryMeta: CountryMeta = {
   vatExemptEu: ['AX', 'IC'],
   mandatoryPostalCodes: ['US', 'CA', 'GB', 'SE', 'FI', 'DE', 'FR', 'ES', 'IT', 'NL', 'PL'],
   stateRequired: ['US', 'CA', 'AU', 'BR', 'MX'],
+  hidePostalCodes: ['IE', 'HK'],
+  hideAddressLine2: ['HK'],
   hideQuickSearch: [],
 };
