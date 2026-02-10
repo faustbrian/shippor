@@ -26,13 +26,17 @@ export function ShippingMethodCard({
   isPickup: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const tags = method.tags ?? [];
 
   return (
     <SectionCard>
       <Pressable onPress={onSelect} style={{ gap: 8 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: '800', fontSize: 16 }}>{method.label}</Text>
+            <Text style={{ fontWeight: '800', fontSize: 16 }}>
+              {method.logo ? `${method.logo} ` : ''}
+              {method.label}
+            </Text>
             <Text style={{ color: '#667085' }}>{method.carrier}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
@@ -46,6 +50,9 @@ export function ShippingMethodCard({
           {method.printerRequired ? <Tag text="Printer required" /> : <Tag text="No printer" />}
           {method.isReturnService ? <Tag text="Return service" /> : null}
           {method.serviceId.includes('wolt') ? <Tag text="Same day" /> : null}
+          {tags.map((tag) => (
+            <Tag key={tag} text={tag} />
+          ))}
         </View>
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -68,6 +75,9 @@ export function ShippingMethodCard({
             <Ionicons name="cube-outline" size={16} color="#344054" />
             <Text>Service ID: {method.serviceId}</Text>
           </View>
+          {method.infoText?.map((text) => (
+            <Text key={text} style={{ color: '#475467' }}>{text}</Text>
+          ))}
           <PrimaryButton label="Confirm and continue" onPress={onConfirm} />
         </View>
       ) : null}

@@ -28,13 +28,32 @@ export function ShippingMethodInstructionsPanel({ method }: { method: ShippingMe
   return (
     <SectionCard>
       <Text style={{ fontWeight: '700' }}>Shipping Method Instructions</Text>
-      <Text style={{ fontWeight: '600' }}>{method.label}</Text>
+      <Text style={{ fontWeight: '600' }}>
+        {method.logo ? `${method.logo} ` : ''}
+        {method.label}
+      </Text>
       <Text>{method.carrier} • ETA {method.eta}</Text>
       <View style={{ gap: 4, marginTop: 6 }}>
         {notes.map((note) => (
           <Text key={note}>• {note}</Text>
         ))}
       </View>
+      {method.dropOffTimes?.length ? (
+        <View style={{ marginTop: 8, gap: 4 }}>
+          <Text style={{ fontWeight: '700' }}>Drop-off times</Text>
+          {method.dropOffTimes.map((time) => (
+            <Text key={time}>• {time}</Text>
+          ))}
+        </View>
+      ) : null}
+      {method.openingHours?.length ? (
+        <View style={{ marginTop: 8, gap: 4 }}>
+          <Text style={{ fontWeight: '700' }}>Opening hours / service windows</Text>
+          {method.openingHours.map((line) => (
+            <Text key={line}>• {line}</Text>
+          ))}
+        </View>
+      ) : null}
     </SectionCard>
   );
 }

@@ -61,7 +61,19 @@ export function SendMethodsScreen({ navigation }: Props) {
 
     return (
       <SectionCard>
-        <Text style={{ fontWeight: '700' }}>{title}</Text>
+        <View
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: '#EAECF0',
+            paddingBottom: 8,
+            marginBottom: 6,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Text style={{ fontWeight: '800' }}>{title}</Text>
+          <Text style={{ color: '#667085' }}>{list.length} option(s)</Text>
+        </View>
         {list.map((method) => (
           <ShippingMethodCard
             key={method.id}

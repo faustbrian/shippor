@@ -50,6 +50,11 @@ export interface ShippingMethod {
   isPickupLocationMethod: boolean;
   isReturnService: boolean;
   requiresEmailForRecipient?: boolean;
+  logo?: string;
+  tags?: string[];
+  infoText?: string[];
+  dropOffTimes?: string[];
+  openingHours?: string[];
 }
 
 export interface ShipmentDraft {

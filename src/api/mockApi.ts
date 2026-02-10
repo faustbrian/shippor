@@ -117,6 +117,14 @@ const shippingMethods: ShippingMethod[] = [
     isPickupLocationMethod: false,
     isReturnService: false,
     requiresEmailForRecipient: true,
+    logo: '✈️',
+    tags: ['Fastest', 'Door delivery'],
+    infoText: [
+      'Best for international parcels and urgent deliveries.',
+      'Tracking updates every transit checkpoint.',
+    ],
+    dropOffTimes: ['Mon-Fri before 16:00 for same-day dispatch'],
+    openingHours: ['Courier pickup window: 09:00-18:00'],
   },
   {
     id: 'm-2',
@@ -130,6 +138,14 @@ const shippingMethods: ShippingMethod[] = [
     isPickupLocationMethod: true,
     isReturnService: false,
     requiresEmailForRecipient: false,
+    logo: '📦',
+    tags: ['Cheapest', 'Pickup point'],
+    infoText: [
+      'Most affordable service for non-urgent deliveries.',
+      'Pickup point handoff required.',
+    ],
+    dropOffTimes: ['Mon-Sat before 20:00 at selected pickup point'],
+    openingHours: ['Pickup partner hours vary by location'],
   },
   {
     id: 'm-3',
@@ -143,6 +159,14 @@ const shippingMethods: ShippingMethod[] = [
     isPickupLocationMethod: false,
     isReturnService: false,
     requiresEmailForRecipient: false,
+    logo: '🛵',
+    tags: ['Same day', 'Metro only'],
+    infoText: [
+      'Available for selected city zones only.',
+      'Service cut-off depends on courier capacity.',
+    ],
+    dropOffTimes: ['Order before 14:00 for same-day route'],
+    openingHours: ['Live courier windows shown during checkout'],
   },
 ];
 
