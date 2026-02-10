@@ -21,6 +21,7 @@ export interface Address {
   socialSecurityNumber?: string;
   employerIdentificationNumber?: string;
   payerRelation?: string;
+  vatTaxIdType?: string;
 }
 
 export interface Parcel {
@@ -79,6 +80,21 @@ export interface ShipmentDraft {
   items: ShipmentItem[];
   selectedMethod: ShippingMethod | null;
   pickupLocationId: string | null;
+  payingParty: 'sender' | 'recipient' | 'third-party';
+  payingAddress: Address;
+  commerceInvoiceMode: 'simple' | 'power';
+  commerceInvoiceMeta: {
+    invoiceNumber: string;
+    exportReason: string;
+    incoterm: string;
+    importerReference: string;
+  };
+  dangerousGoods: {
+    unNumber: string;
+    hazardClass: string;
+    packingGroup: string;
+    emergencyContact: string;
+  };
   addons: {
     cashOnDelivery: boolean;
     pickup?: boolean;

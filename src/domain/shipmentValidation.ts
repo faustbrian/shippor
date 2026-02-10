@@ -75,6 +75,21 @@ export function createEmptyShipmentDraft(): ShipmentDraft {
     items: [],
     selectedMethod: null,
     pickupLocationId: null,
+    payingParty: 'sender',
+    payingAddress: emptyAddress('paying'),
+    commerceInvoiceMode: 'simple',
+    commerceInvoiceMeta: {
+      invoiceNumber: '',
+      exportReason: '',
+      incoterm: '',
+      importerReference: '',
+    },
+    dangerousGoods: {
+      unNumber: '',
+      hazardClass: '',
+      packingGroup: '',
+      emergencyContact: '',
+    },
     addons: {
       cashOnDelivery: false,
       pickup: false,
