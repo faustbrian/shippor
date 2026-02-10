@@ -72,6 +72,7 @@ interface AppState {
   loadPickupLocations: (serviceId: string) => Promise<void>;
   setSelectedPaymentMethod: (value: string) => void;
   setAgreeToTerms: (value: boolean) => void;
+  resetCheckoutFailure: () => void;
   addDraftToCart: () => void;
   removeCartItem: (id: string) => void;
   submitCart: () => Promise<boolean>;
@@ -283,6 +284,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ agreeToTerms: value, checkoutError: null });
   },
 
+  resetCheckoutFailure() {
+    set({
+      checkoutError: null,
+      checkoutFlowState: 'not-started',
+    });
+  },
+
   addDraftToCart() {
     const draft = get().currentDraft;
     const item = draftToCartItem(draft);
@@ -314,6 +322,15 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     if (!agreeToTerms) {
       set({ checkoutError: 'You must agree to terms before payment', checkoutFlowState: 'failed-payment' });
+      return false;
+    }
+
+    // Stubbed gateway behavior to exercise failed-payment flow in UI
+    if (selectedPaymentMethod === 'invoice') {
+      set({
+        checkoutError: 'Invoice gateway stub returned failed-payment. Use card or wallet and retry.',
+        checkoutFlowState: 'failed-payment',
+      });
       return false;
     }
 

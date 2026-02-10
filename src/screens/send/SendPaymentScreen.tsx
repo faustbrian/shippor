@@ -6,6 +6,8 @@ import { PaymentMethodCard } from '../../components/PaymentMethodCard';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
 import { useAppStore, useCartTotals } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
+import { PaymentStateBanner } from '../../components/PaymentStateBanner';
+import { CartSidePanelMobile } from '../../components/CartSidePanelMobile';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendPayment'>;
 
@@ -23,6 +25,7 @@ export function SendPaymentScreen({ navigation }: Props) {
   const checkoutFlowState = useAppStore((state) => state.checkoutFlowState);
   const setSelectedPaymentMethod = useAppStore((state) => state.setSelectedPaymentMethod);
   const setAgreeToTerms = useAppStore((state) => state.setAgreeToTerms);
+  const resetCheckoutFailure = useAppStore((state) => state.resetCheckoutFailure);
   const submitCart = useAppStore((state) => state.submitCart);
   const isBusy = useAppStore((state) => state.isBusy);
   const totals = useCartTotals();
@@ -39,6 +42,12 @@ export function SendPaymentScreen({ navigation }: Props) {
       <ScrollView>
         <SendStepHeader currentStep={6} />
         <Heading>Send - Payment</Heading>
+        <PaymentStateBanner
+          state={checkoutFlowState}
+          onRetry={() => {
+            resetCheckoutFailure();
+          }}
+        />
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Payment method</Text>
@@ -80,6 +89,14 @@ export function SendPaymentScreen({ navigation }: Props) {
           <Text>Fee: ${totals.fee.toFixed(2)}</Text>
           <Text style={{ fontWeight: '700' }}>Total: ${totals.total.toFixed(2)}</Text>
         </SectionCard>
+        <CartSidePanelMobile
+          itemsCount={cart.length}
+          subtotal={totals.subtotal}
+          fee={totals.fee}
+          total={totals.total}
+          state={checkoutFlowState}
+          selectedPayment={selectedPaymentMethod}
+        />
 
         {cart[0]?.draft ? <ShippingFlowSidePanel draft={cart[0].draft} /> : null}
 

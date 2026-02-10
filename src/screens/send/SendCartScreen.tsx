@@ -5,6 +5,8 @@ import { useAppStore, useCartTotals } from '../../store/useAppStore';
 import type { SendStackParamList } from '../../navigation/types';
 import { SendStepHeader } from '../../components/SendStepHeader';
 import { ShippingFlowSidePanel } from '../../components/ShippingFlowSidePanel';
+import { CartSidePanelMobile } from '../../components/CartSidePanelMobile';
+import { PaymentStateBanner } from '../../components/PaymentStateBanner';
 
 type Props = NativeStackScreenProps<SendStackParamList, 'SendCart'>;
 
@@ -30,6 +32,7 @@ export function SendCartScreen({ navigation }: Props) {
           <Text>Selected payment: {selectedPaymentMethod || 'Not selected'}</Text>
           <Text>Agreed to terms: {agreeToTerms ? 'Yes' : 'No'}</Text>
         </SectionCard>
+        <PaymentStateBanner state={checkoutFlowState} />
 
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Current shipment draft</Text>
@@ -55,12 +58,14 @@ export function SendCartScreen({ navigation }: Props) {
           )}
         </SectionCard>
 
-        <SectionCard>
-          <Text style={{ fontWeight: '700' }}>Totals</Text>
-          <Text>Subtotal: ${totals.subtotal.toFixed(2)}</Text>
-          <Text>Fee: ${totals.fee.toFixed(2)}</Text>
-          <Text style={{ fontWeight: '700' }}>Total: ${totals.total.toFixed(2)}</Text>
-        </SectionCard>
+        <CartSidePanelMobile
+          itemsCount={cart.length}
+          subtotal={totals.subtotal}
+          fee={totals.fee}
+          total={totals.total}
+          state={checkoutFlowState}
+          selectedPayment={selectedPaymentMethod}
+        />
         <SectionCard>
           <Text style={{ color: '#667085' }}>
             Continue to payment to confirm gateway selection, agree to terms,
