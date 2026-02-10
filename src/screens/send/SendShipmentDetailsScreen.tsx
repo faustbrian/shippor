@@ -208,6 +208,42 @@ export function SendShipmentDetailsScreen({ navigation }: Props) {
         <SectionCard>
           <Text style={{ fontWeight: '700' }}>Additional services</Text>
           <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Shipment collection service</Text>
+            <Switch
+              value={Boolean(draft.addons.pickup)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, pickup: value } })
+              }
+            />
+          </View>
+          <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Doorstep delivery</Text>
+            <Switch
+              value={Boolean(draft.addons.delivery)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, delivery: value } })
+              }
+            />
+          </View>
+          <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Delivered by 9 AM</Text>
+            <Switch
+              value={Boolean(draft.addons.delivery09)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, delivery09: value } })
+              }
+            />
+          </View>
+          <View style={ui.row}>
+            <Text style={{ flex: 1 }}>Limited quantities</Text>
+            <Switch
+              value={Boolean(draft.addons.limitedQtys)}
+              onValueChange={(value) =>
+                setDraft({ ...draft, addons: { ...draft.addons, limitedQtys: value } })
+              }
+            />
+          </View>
+          <View style={ui.row}>
             <Text style={{ flex: 1 }}>Fragile</Text>
             <Switch
               value={Boolean(draft.addons.fragile)}

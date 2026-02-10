@@ -79,6 +79,10 @@ export interface ShipmentDraft {
   pickupLocationId: string | null;
   addons: {
     cashOnDelivery: boolean;
+    pickup?: boolean;
+    delivery?: boolean;
+    delivery09?: boolean;
+    limitedQtys?: boolean;
     dangerous?: boolean;
     fragile?: boolean;
     proofOfDelivery?: boolean;

@@ -4,6 +4,10 @@ import type { ShipmentDraft } from '../types/models';
 
 function enabledAddons(draft: ShipmentDraft): string[] {
   const labels: [keyof ShipmentDraft['addons'], string][] = [
+    ['pickup', 'Shipment collection'],
+    ['delivery', 'Doorstep delivery'],
+    ['delivery09', 'Delivery by 9 AM'],
+    ['limitedQtys', 'Limited quantities'],
     ['fragile', 'Fragile'],
     ['dangerous', 'Dangerous goods'],
     ['proofOfDelivery', 'Proof of delivery'],
