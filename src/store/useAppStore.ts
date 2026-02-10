@@ -74,6 +74,7 @@ interface AppState {
   setSelectedPaymentMethod: (value: string) => void;
   setAgreeToTerms: (value: boolean) => void;
   resetCheckoutFailure: () => void;
+  submitQuickShipment: () => Promise<boolean>;
   addDraftToCart: () => void;
   retryCartItem: (id: string) => void;
   removeCartItem: (id: string) => void;
@@ -294,6 +295,53 @@ export const useAppStore = create<AppState>((set, get) => ({
       checkoutError: null,
       checkoutFlowState: 'not-started',
     });
+  },
+
+  async submitQuickShipment() {
+    const draft = get().currentDraft;
+    let selectedMethod = draft.selectedMethod;
+    if (!selectedMethod) {
+      const methods = await fetchShippingMethods(draft);
+      if (methods.length) {
+        selectedMethod = methods[0];
+      }
+    }
+
+    if (!draft.senderAddress.name || !draft.recipientAddress.name || !selectedMethod) {
+      set({
+        checkoutError: 'Quick shipment requires sender, recipient, and method',
+        checkoutFlowState: 'failed-payment',
+      });
+      return false;
+    }
+
+    set({ isBusy: true, checkoutError: null, checkoutFlowState: 'pending' });
+    const created = await createShipmentFromDraft({
+      ...draft,
+      selectedMethod,
+    });
+    const [dashboard, nextShipments, tracking] = await Promise.all([
+      fetchDashboard(),
+      fetchShipments(),
+      fetchTrackingHistory(),
+    ]);
+
+    set({
+      isBusy: false,
+      checkoutFlowState: 'shipped',
+      dashboardBalance: dashboard.accountBalance,
+      shipments: nextShipments,
+      trackingEvents: tracking,
+      trackingSearchResult: tracking,
+      lastCheckoutShipments: [created],
+      currentDraft: createNewDraft(),
+      shippingMethods: [],
+      pickupLocations: [],
+      cart: [],
+      cartItemErrors: {},
+    });
+
+    return true;
   },
 
   addDraftToCart() {

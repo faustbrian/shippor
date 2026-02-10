@@ -124,6 +124,13 @@ export function SendBasicScreen({ navigation }: Props) {
       <ScrollView>
         <SendStepHeader currentStep={1} />
         <Heading>Send - Basic</Heading>
+        <SectionCard>
+          <Text style={{ fontWeight: '700' }}>Quick shipping</Text>
+          <SecondaryButton
+            label="Open quick shipping tool"
+            onPress={() => navigation.navigate('SendQuickStart')}
+          />
+        </SectionCard>
         <ConsignmentTemplateCard draft={draft} onApply={setDraft} />
         <RecentShipmentsPanel
           shipments={shipments}
